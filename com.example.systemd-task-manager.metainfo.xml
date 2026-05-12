@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.example.systemd-task-manager</id>
+  <name>Systemd User Task Manager</name>
+  <summary>Manage systemd user services and timers</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>
+      A GTK4/Libadwaita application to manage systemd user units as scheduled tasks.
+      It allows users to create, edit, and monitor services and timers with ease.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.example.systemd-task-manager.desktop</launchable>
+  <url type="homepage">https://github.com/ktkr3d/systemd-user-task-manager</url>
+  <screenshots>
+  </screenshots>
+  <content_rating type="oars-1.1" />
+</component>

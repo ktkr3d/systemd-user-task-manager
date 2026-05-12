@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Systemd User Task Manager
+Comment=Manage systemd user services and timers
+Exec=systemd-user-task-manager
+Icon=com.example.systemd-task-manager
+Terminal=false
+Type=Application
+Categories=System;Utility;GTK;GNOME;
+StartupNotify=true
+Keywords=systemd;user;task;manager;timer;service;

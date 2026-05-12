@@ -1,6 +1,8 @@
 import os
 import subprocess
 import re
+import datetime
+from gi.repository import Gio, GLib
 
 class SystemdManager:
     UNIT_PATH = os.path.expanduser("~/.config/systemd/user/")
@@ -8,9 +10,18 @@ class SystemdManager:
 
     def __init__(self):
         os.makedirs(self.UNIT_PATH, exist_ok=True)
-
-    def _run_systemctl(self, *args):
-        subprocess.run(["systemctl", "--user"] + list(args), check=False)
+        # --userに相当するセッションバスを取得
+        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        # systemdのManagerプロキシを作成
+        self.proxy = Gio.DBusProxy.new_sync(
+            self.bus,
+            Gio.DBusProxyFlags.NONE,
+            None,
+            "org.freedesktop.systemd1",
+            "/org/freedesktop/systemd1",
+            "org.freedesktop.systemd1.Manager",
+            None
+        )
 
     def _sanitize_id(self, task_id):
         # 空白や記号をハイフンに置換し、英数字・ハイフン・アンダースコアのみを許容する
@@ -38,22 +49,65 @@ class SystemdManager:
         with open(os.path.join(self.UNIT_PATH, timer_name), "w") as f:
             f.write(timer_content)
 
-        self._run_systemctl("daemon-reload")
-        self._run_systemctl("enable", service_name)
-        self._run_systemctl("enable", "--now", timer_name)
+        # D-Bus経由で操作
+        self.proxy.Reload()
+        # EnableUnitFiles(names, runtime, force)
+        self.proxy.EnableUnitFiles([service_name], False, True)
+        self.proxy.EnableUnitFiles([timer_name], False, True)
+        # タイマーを開始
+        self.proxy.StartUnit(timer_name, "replace")
+
+    def _get_unit_properties(self, unit_name):
+        """D-Bus経由でユニットのプロパティを取得します。"""
+        try:
+            # GetUnitはユニットがロードされていない場合に例外を投げます
+            path = self.proxy.GetUnit(unit_name)
+            
+            # Unitインターフェースのプロパティを取得
+            unit_props = self.bus.call_sync(
+                "org.freedesktop.systemd1",
+                path,
+                "org.freedesktop.DBus.Properties",
+                "GetAll",
+                GLib.Variant("(s)", ["org.freedesktop.systemd1.Unit"]),
+                None, Gio.DBusCallFlags.NONE, -1, None
+            ).unpack()[0]
+            
+            # タイマーまたはサービス固有のプロパティを取得
+            iface = "org.freedesktop.systemd1.Timer" if unit_name.endswith(".timer") else "org.freedesktop.systemd1.Service"
+            spec_props = self.bus.call_sync(
+                "org.freedesktop.systemd1",
+                path,
+                "org.freedesktop.DBus.Properties",
+                "GetAll",
+                GLib.Variant("(s)", [iface]),
+                None, Gio.DBusCallFlags.NONE, -1, None
+            ).unpack()[0]
+            
+            unit_props.update(spec_props)
+            return unit_props
+        except Exception:
+            return {}
 
     def delete_task(self, task_id):
         task_id = self._sanitize_id(task_id)
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
-        self._run_systemctl("disable", "--now", service_name, timer_name)
+        
+        try:
+            self.proxy.StopUnit(timer_name, "replace")
+            self.proxy.StopUnit(service_name, "replace")
+        except Exception:
+            pass
+
+        self.proxy.DisableUnitFiles([timer_name, service_name], False)
         
         for ext in [".service", ".timer"]:
             path = os.path.join(self.UNIT_PATH, f"{self.PREFIX}{task_id}{ext}")
             if os.path.exists(path):
                 os.remove(path)
         
-        self._run_systemctl("daemon-reload")
+        self.proxy.Reload()
 
     def list_tasks(self):
         tasks = []
@@ -92,45 +146,34 @@ class SystemdManager:
                 # ユニットの状態を取得 (前回・次回の実行時刻)
                 timer_unit = f"{self.PREFIX}{task_id}.timer"
                 service_unit = f"{self.PREFIX}{task_id}.service"
-                show_res = subprocess.run(
-                    [
-                        "systemctl", "--user", "show", 
-                        timer_unit, 
-                        service_unit, 
-                        "--property=LastTriggerUSecRealtime,NextElapseUSecRealtime,UnitFileState,"
-                        "LastTriggerUSec,NextElapseUSec,"
-                        "ExecMainExitTimestampRealtime,ActiveEnterTimestampRealtime,ActiveEnterTimestamp,"
-                        "InactiveEnterTimestampRealtime"
-                    ],
-                    capture_output=True, text=True
-                )
-                
-                stats = {"last": "なし", "next": "なし", "enabled": False}
-                for line in show_res.stdout.splitlines():
-                    if "=" not in line:
-                        continue
-                    key, val = line.split("=", 1)
-                    val = val.strip()
-                    
-                    if key == "UnitFileState":
-                        if val.startswith("enabled"):
-                            stats["enabled"] = True
-                    
-                    if not val or val in ("0", "n/a", "infinity", "[no value]", "[unset]"):
-                        continue
 
-                    # 前回実行時刻の候補（優先度の高い順）
-                    # 1. タイマーのトリガー時刻
-                    if key in ("LastTriggerUSecRealtime", "LastTriggerUSec"):
-                        # すでに値がある場合は、より具体的な値（Realtime）を優先
-                        if stats["last"] == "なし" or "Realtime" in key:
-                            stats["last"] = val
-                    # 2. サービスの開始/終了時刻（タイマーの時刻が取れない場合のフォールバック）
-                    elif key in ("ExecMainExitTimestampRealtime", "ActiveEnterTimestampRealtime", "ActiveEnterTimestamp", "InactiveEnterTimestampRealtime"):
-                        stats["last"] = val
-                    # 次回実行予定
-                    elif key in ("NextElapseUSecRealtime", "NextElapseUSec"):
-                        stats["next"] = val
+                t_props = self._get_unit_properties(timer_unit)
+                s_props = self._get_unit_properties(service_unit)
+
+                stats = {"last": "なし", "next": "なし", "enabled": False}
+
+                # 有効化状態の確認 (ロードされていない場合も考慮してManagerから取得を試みる)
+                try:
+                    state = self.proxy.GetUnitFileState(timer_unit)
+                    if state == "enabled":
+                        stats["enabled"] = True
+                except Exception:
+                    if t_props.get("UnitFileState") == "enabled":
+                        stats["enabled"] = True
+
+                # 前回実行時刻の取得 (D-Busからはマイクロ秒単位の数値が返ります)
+                last_usec = t_props.get("LastTriggerUSecRealtime", 0)
+                if not last_usec:
+                    # タイマーの記録がない場合、サービスの開始/終了時刻をフォールバックとして使用
+                    last_usec = s_props.get("ExecMainExitTimestampRealtime", 0) or \
+                                s_props.get("ActiveEnterTimestampRealtime", 0) or \
+                                s_props.get("InactiveEnterTimestampRealtime", 0)
+
+                stats["last"] = self._format_usec(last_usec) or "なし"
+
+                # 次回実行予定
+                next_usec = t_props.get("NextElapseUSecRealtime", 0)
+                stats["next"] = self._format_usec(next_usec) or "なし"
 
                 tasks.append({
                     "id": task_id, 
@@ -143,15 +186,27 @@ class SystemdManager:
                 })
         return tasks
 
+    def _format_usec(self, usec):
+        if not usec or usec <= 0 or usec >= 18446744073709551615:
+            return None
+        dt = datetime.datetime.fromtimestamp(usec / 1000000)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
     def toggle_task(self, task_id, enabled):
         task_id = self._sanitize_id(task_id)
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
         if enabled:
-            self._run_systemctl("enable", service_name)
-            self._run_systemctl("enable", "--now", timer_name)
+            self.proxy.EnableUnitFiles([service_name], False, True)
+            self.proxy.EnableUnitFiles([timer_name], False, True)
+            self.proxy.StartUnit(timer_name, "replace")
         else:
-            self._run_systemctl("disable", "--now", service_name, timer_name)
+            try:
+                self.proxy.StopUnit(timer_name, "replace")
+                self.proxy.StopUnit(service_name, "replace")
+            except Exception:
+                pass
+            self.proxy.DisableUnitFiles([timer_name, service_name], False)
 
     def validate_calendar(self, schedule):
         """systemd-analyze calendarを使用してスケジュールを検証する"""
@@ -171,6 +226,8 @@ class SystemdManager:
             for line in res.stdout.splitlines():
                 if "Next elapse:" in line:
                     return True, line.split(":", 1)[1].strip()
+        except FileNotFoundError:
+            return False, "systemd-analyze コマンドが見つかりません"
         except subprocess.CalledProcessError as e:
             # エラーメッセージを整形（プレフィックスを除去）
             error_msg = e.stderr.splitlines()[0] if e.stderr else "無効な形式です"
