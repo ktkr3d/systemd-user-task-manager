@@ -90,21 +90,46 @@ class SystemdManager:
 
                 # ユニットの状態を取得 (前回・次回の実行時刻)
                 timer_unit = f"{self.PREFIX}{task_id}.timer"
+                service_unit = f"{self.PREFIX}{task_id}.service"
                 show_res = subprocess.run(
-                    ["systemctl", "--user", "show", timer_unit, "--property=LastTriggerUSecRealtime,NextElapseUSecRealtime,UnitFileState"],
+                    [
+                        "systemctl", "--user", "show", 
+                        timer_unit, 
+                        service_unit, 
+                        "--property=LastTriggerUSecRealtime,NextElapseUSecRealtime,UnitFileState,"
+                        "LastTriggerUSec,NextElapseUSec,"
+                        "ExecMainExitTimestampRealtime,ActiveEnterTimestampRealtime,ActiveEnterTimestamp,"
+                        "InactiveEnterTimestampRealtime"
+                    ],
                     capture_output=True, text=True
                 )
                 
                 stats = {"last": "なし", "next": "なし", "enabled": False}
                 for line in show_res.stdout.splitlines():
-                    if "=" in line:
-                        key, val = line.split("=", 1)
-                        val = val.strip()
-                        if key == "UnitFileState":
-                            stats["enabled"] = val.startswith("enabled")
-                        elif val and val != "0":
-                            if key == "LastTriggerUSecRealtime": stats["last"] = val
-                            if key == "NextElapseUSecRealtime": stats["next"] = val
+                    if "=" not in line:
+                        continue
+                    key, val = line.split("=", 1)
+                    val = val.strip()
+                    
+                    if key == "UnitFileState":
+                        if val.startswith("enabled"):
+                            stats["enabled"] = True
+                    
+                    if not val or val in ("0", "n/a", "infinity", "[no value]", "[unset]"):
+                        continue
+
+                    # 前回実行時刻の候補（優先度の高い順）
+                    # 1. タイマーのトリガー時刻
+                    if key in ("LastTriggerUSecRealtime", "LastTriggerUSec"):
+                        # すでに値がある場合は、より具体的な値（Realtime）を優先
+                        if stats["last"] == "なし" or "Realtime" in key:
+                            stats["last"] = val
+                    # 2. サービスの開始/終了時刻（タイマーの時刻が取れない場合のフォールバック）
+                    elif key in ("ExecMainExitTimestampRealtime", "ActiveEnterTimestampRealtime", "ActiveEnterTimestamp", "InactiveEnterTimestampRealtime"):
+                        stats["last"] = val
+                    # 次回実行予定
+                    elif key in ("NextElapseUSecRealtime", "NextElapseUSec"):
+                        stats["next"] = val
 
                 tasks.append({
                     "id": task_id, 
