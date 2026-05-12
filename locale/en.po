@@ -1,0 +1,113 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: systemd-user-task-manager 0.1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+
+msgid "タスクの設定"
+msgstr "Task Settings"
+
+msgid "キャンセル"
+msgstr "Cancel"
+
+msgid "保存"
+msgstr "Save"
+
+msgid "タスク名 (ID)"
+msgstr "Task ID"
+
+msgid "実行コマンド"
+msgstr "Command to execute"
+
+msgid "ファイルを選択"
+msgstr "Select file"
+
+msgid "起動後の遅延 (分)"
+msgstr "Delay after boot (min)"
+
+msgid "停止中の実行漏れを次回起動時に実行 (Persistent)"
+msgstr "Execute missed tasks on next boot (Persistent)"
+
+msgid "カスタム"
+msgstr "Custom"
+
+msgid "起動時"
+msgstr "At Startup"
+
+msgid "毎時"
+msgstr "Hourly"
+
+msgid "毎日"
+msgstr "Daily"
+
+msgid "毎週"
+msgstr "Weekly"
+
+msgid "毎月"
+msgstr "Monthly"
+
+msgid "スケジュール（プリセット）"
+msgstr "Schedule (Preset)"
+
+msgid "スケジュール (OnCalendar)"
+msgstr "Schedule (OnCalendar)"
+
+msgid ""
+"systemdの時刻指定形式（OnCalendar）を入力します。\n"
+"\n"
+"主な例:\n"
+"・hourly, daily, weekly, monthly\n"
+"・12:00 (毎日12:00)\n"
+"・Mon 09:00 (毎週月曜 09:00)\n"
+"・*:00/15 (15分おき)\n"
+"・*-*-01 00:00 (毎月1日)"
+msgstr ""
+"Enter systemd time format (OnCalendar).\n"
+"\n"
+"Examples:\n"
+"- hourly, daily, weekly, monthly\n"
+"- 12:00 (Every day at 12:00)\n"
+"- Mon 09:00 (Every Monday at 09:00)\n"
+"- *:00/15 (Every 15 minutes)\n"
+"- *-*-01 00:00 (1st of every month)"
+
+msgid "コマンドファイルを選択"
+msgstr "Select command file"
+
+msgid "システム設定に従う"
+msgstr "Follow system settings"
+
+msgid "ライトテーマ"
+msgstr "Light theme"
+
+msgid "ダークテーマ"
+msgstr "Dark theme"
+
+msgid "テーマ"
+msgstr "Theme"
+
+msgid ""
+"次回: {}\n"
+"前回: {} ({})"
+msgstr ""
+"Next: {}\n"
+"Last: {} ({})"
+
+msgid "最新の情報に更新"
+msgstr "Refresh"
+
+msgid "ユニットファイルの場所を開く"
+msgstr "Open unit files folder"
+
+msgid "Systemd User Task Manager について"
+msgstr "About Systemd User Task Manager"
+
+msgid "タスクを削除しますか？"
+msgstr "Delete task?"
+
+msgid "タスク「{}」を削除します。この操作は取り消せません。"
+msgstr "Task \"{}\" will be deleted. This action cannot be undone."
+
+msgid "削除"
+msgstr "Delete"

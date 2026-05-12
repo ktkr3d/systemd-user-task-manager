@@ -7,7 +7,7 @@ from gi.repository import Gtk, Adw
 class TaskDialog(Adw.Window):
     def __init__(self, parent, manager, task_data=None):
         super().__init__(transient_for=parent, modal=True)
-        self.set_title("タスクの設定")
+        self.set_title(_("タスクの設定"))
         self.set_default_size(400, -1)
 
         self.manager = manager
@@ -20,52 +20,47 @@ class TaskDialog(Adw.Window):
         header = Adw.HeaderBar()
         main_box.append(header)
 
-        cancel_btn = Gtk.Button(label="キャンセル")
+        cancel_btn = Gtk.Button(label=_("キャンセル"))
         cancel_btn.connect("clicked", lambda _: self.close())
         header.pack_start(cancel_btn)
 
-        self.save_btn = Gtk.Button(label="保存")
+        self.save_btn = Gtk.Button(label=_("保存"))
         self.save_btn.add_css_class("suggested-action")
         self.save_btn.connect("clicked", self.on_save)
         header.pack_end(self.save_btn)
 
         group = Adw.PreferencesGroup()
         
-        self.name_entry = Adw.EntryRow(title="タスク名 (ID)")
+        self.name_entry = Adw.EntryRow(title=_("タスク名 (ID)"))
 
-        self.cmd_entry = Adw.EntryRow(title="実行コマンド")
+        self.cmd_entry = Adw.EntryRow(title=_("実行コマンド"))
         self.file_chooser_btn = Gtk.Button(icon_name="document-open-symbolic")
-        self.file_chooser_btn.set_tooltip_text("ファイルを選択")
+        self.file_chooser_btn.set_tooltip_text(_("ファイルを選択"))
         self.file_chooser_btn.connect("clicked", self.on_select_command_file)
         self.cmd_entry.add_suffix(self.file_chooser_btn)
 
         self.delay_spin = Gtk.SpinButton.new_with_range(0, 1440, 1)
-        self.delay_row = Adw.ActionRow(title="起動後の遅延 (分)")
+        self.delay_row = Adw.ActionRow(title=_("起動後の遅延 (分)"))
         self.delay_row.add_suffix(self.delay_spin)
 
-        self.persistent_row = Adw.SwitchRow(title="停止中の実行漏れを次回起動時に実行 (Persistent)")
+        self.persistent_row = Adw.SwitchRow(title=_("停止中の実行漏れを次回起動時に実行 (Persistent)"))
 
-        self.preset_labels = ["カスタム", "起動時", "毎時", "毎日", "毎週", "毎月"]
-        self.presets = {
-            "起動時": "startup",
-            "毎時": "hourly",
-            "毎日": "daily",
-            "毎週": "weekly",
-            "毎月": "monthly"
-        }
+        self.preset_labels = [_("カスタム"), _("起動時"), _("毎時"), _("毎日"), _("毎週"), _("毎月")]
+        self.preset_values = [None, "startup", "hourly", "daily", "weekly", "monthly"]
+
         model = Gtk.StringList.new(self.preset_labels)
-        self.combo_row = Adw.ComboRow(title="スケジュール（プリセット）", model=model)
+        self.combo_row = Adw.ComboRow(title=_("スケジュール（プリセット）"), model=model)
         self.combo_handler_id = self.combo_row.connect("notify::selected", self.on_combo_changed)
 
-        self.schedule_entry = Adw.EntryRow(title="スケジュール (OnCalendar)", text="hourly")
+        self.schedule_entry = Adw.EntryRow(title=_("スケジュール (OnCalendar)"), text="hourly")
         self.schedule_entry.set_tooltip_text(
-            "systemdの時刻指定形式（OnCalendar）を入力します。\n\n"
-            "主な例:\n"
-            "・hourly, daily, weekly, monthly\n"
-            "・12:00 (毎日12:00)\n"
-            "・Mon 09:00 (毎週月曜 09:00)\n"
-            "・*:00/15 (15分おき)\n"
-            "・*-*-01 00:00 (毎月1日)"
+            _("systemdの時刻指定形式（OnCalendar）を入力します。\n\n"
+              "主な例:\n"
+              "・hourly, daily, weekly, monthly\n"
+              "・12:00 (毎日12:00)\n"
+              "・Mon 09:00 (毎週月曜 09:00)\n"
+              "・*:00/15 (15分おき)\n"
+              "・*-*-01 00:00 (毎月1日)")
         )
         
         if task_data:
@@ -87,8 +82,8 @@ class TaskDialog(Adw.Window):
 
             # 初期値に基づいてコンボボックスの選択状態を復元
             idx = 0
-            for i, label in enumerate(self.preset_labels):
-                if self.presets.get(label) == task_data['schedule']:
+            for i, val in enumerate(self.preset_values):
+                if val == task_data['schedule']:
                     idx = i
                     break
             self.combo_row.set_selected(idx)
@@ -118,8 +113,7 @@ class TaskDialog(Adw.Window):
             return
 
         idx = combo.get_selected()
-        label = self.preset_labels[idx]
-        val = self.presets.get(label)
+        val = self.preset_values[idx]
         current_text = self.schedule_entry.get_text()
 
         if val is not None:
@@ -129,7 +123,7 @@ class TaskDialog(Adw.Window):
                 self._updating = False
         else:
             # 「カスタム」選択時、プリセット用キーワードが含まれているならクリアしてモード切替を促す
-            if current_text.startswith("startup") or any(v == current_text for v in self.presets.values()):
+            if current_text.startswith("startup") or any(v == current_text for v in self.preset_values if v):
                 self._updating = True
                 self.schedule_entry.set_text("")
                 self._updating = False
@@ -159,8 +153,8 @@ class TaskDialog(Adw.Window):
 
         # 入力内容に合わせてコンボの選択状態を更新（シグナルの無限ループ防止のため一時ブロック）
         matched_idx = 0
-        for i, label in enumerate(self.preset_labels):
-            p_val = self.presets.get(label)
+        for i, p_val in enumerate(self.preset_values):
+            if not p_val: continue
             if p_val and (schedule == p_val or (p_val == "startup" and schedule.startswith("startup"))):
                 matched_idx = i
                 break
@@ -194,7 +188,7 @@ class TaskDialog(Adw.Window):
         }
 
     def on_select_command_file(self, button):
-        dialog = Gtk.FileDialog(title="コマンドファイルを選択")
+        dialog = Gtk.FileDialog(title=_("コマンドファイルを選択"))
 
         def on_open_finished(source, result):
             try:

@@ -23,14 +23,14 @@ class AppWindow(Adw.ApplicationWindow):
         menu = Gio.Menu.new()
 
         theme_menu = Gio.Menu.new()
-        theme_menu.append("システム設定に従う", "win.change-theme('default')")
-        theme_menu.append("ライトテーマ", "win.change-theme('light')")
-        theme_menu.append("ダークテーマ", "win.change-theme('dark')")
-        menu.append_submenu("テーマ", theme_menu)
+        theme_menu.append(_("システム設定に従う"), "win.change-theme('default')")
+        theme_menu.append(_("ライトテーマ"), "win.change-theme('light')")
+        theme_menu.append(_("ダークテーマ"), "win.change-theme('dark')")
+        menu.append_submenu(_("テーマ"), theme_menu)
 
-        menu.append("最新の情報に更新", "win.refresh")
-        menu.append("ユニットファイルの場所を開く", "win.open-folder")
-        menu.append("Systemd User Task Manager について", "win.about")
+        menu.append(_("最新の情報に更新"), "win.refresh")
+        menu.append(_("ユニットファイルの場所を開く"), "win.open-folder")
+        menu.append(_("Systemd User Task Manager について"), "win.about")
 
         menu_btn = Gtk.MenuButton(icon_name="view-more-symbolic", menu_model=menu)
         header.pack_end(menu_btn)
@@ -79,8 +79,8 @@ class AppWindow(Adw.ApplicationWindow):
         # ロード
         for task in self.manager.list_tasks():
             # スケジュールと実行時間をサブタイトルに表示
-            subtitle = (f"次回: {task['next']}\n"
-                        f"前回: {task['last']} ({task['schedule']})")
+            subtitle = (_("次回: {}\n前回: {} ({})")
+                        .format(task['next'], task['last'], task['schedule']))
             
             row = Adw.ActionRow(title=task['id'], subtitle=subtitle)
             
@@ -163,12 +163,12 @@ class AppWindow(Adw.ApplicationWindow):
     def delete_task(self, task_id):
         dialog = Adw.MessageDialog(
             transient_for=self,
-            heading="タスクを削除しますか？",
-            body=f"タスク「{task_id}」を削除します。この操作は取り消せません。",
+            heading=_("タスクを削除しますか？"),
+            body=_("タスク「{}」を削除します。この操作は取り消せません。").format(task_id),
         )
 
-        dialog.add_response("cancel", "キャンセル")
-        dialog.add_response("delete", "削除")
+        dialog.add_response("cancel", _("キャンセル"))
+        dialog.add_response("delete", _("削除"))
         dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
         dialog.set_default_response("cancel")
         dialog.set_close_response("cancel")
