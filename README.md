@@ -45,9 +45,9 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 3. flatpak
     ```bash
     # SDKのインストール（ビルド用）
-    flatpak install flathub org.gnome.Sdk//46
+    flatpak install flathub org.gnome.Sdk//50
     # プラットフォームのインストール（実行用）
-    flatpak install flathub org.gnome.Platform//46
+    flatpak install flathub org.gnome.Platform//50
     ```
 4. クローン
     ```bash
