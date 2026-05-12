@@ -21,7 +21,7 @@ class SystemdManager:
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
 
-        service_content = f"[Unit]\nDescription=Task {task_id}\n\n[Service]\nExecStart={command}\n\n[Install]\nWantedBy=default.target\n"
+        service_content = f"[Unit]\nDescription=Task {task_id}\n\n[Service]\nType=oneshot\nExecStart={command}\n\n[Install]\nWantedBy=default.target\n"
 
         if schedule.startswith("startup"):
             delay_val = "0"
