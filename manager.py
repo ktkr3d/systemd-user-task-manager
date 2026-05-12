@@ -50,18 +50,39 @@ class SystemdManager:
             f.write(timer_content)
 
         # D-Bus経由で操作
-        self.proxy.Reload()
+        self.proxy.call_sync(
+            "Reload",
+            GLib.Variant("()", ()),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
         # EnableUnitFiles(names, runtime, force)
-        self.proxy.EnableUnitFiles([service_name], False, True)
-        self.proxy.EnableUnitFiles([timer_name], False, True)
+        self.proxy.call_sync(
+            "EnableUnitFiles",
+            GLib.Variant("(asbb)", ([service_name], False, True)),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
+        self.proxy.call_sync(
+            "EnableUnitFiles",
+            GLib.Variant("(asbb)", ([timer_name], False, True)),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
         # タイマーを開始
-        self.proxy.StartUnit(timer_name, "replace")
+        self.proxy.call_sync(
+            "StartUnit",
+            GLib.Variant("(ss)", (timer_name, "replace")),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
 
     def _get_unit_properties(self, unit_name):
         """D-Bus経由でユニットのプロパティを取得します。"""
         try:
             # GetUnitはユニットがロードされていない場合に例外を投げます
-            path = self.proxy.GetUnit(unit_name)
+            path_variant = self.proxy.call_sync(
+                "GetUnit",
+                GLib.Variant("(s)", (unit_name,)),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
+            path = path_variant.unpack()[0]
             
             # Unitインターフェースのプロパティを取得
             unit_props = self.bus.call_sync(
@@ -95,13 +116,25 @@ class SystemdManager:
         timer_name = f"{self.PREFIX}{task_id}.timer"
         
         try:
-            self.proxy.StopUnit(timer_name, "replace")
-            self.proxy.StopUnit(service_name, "replace")
+            self.proxy.call_sync(
+                "StopUnit",
+                GLib.Variant("(ss)", (timer_name, "replace")),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
+            self.proxy.call_sync(
+                "StopUnit",
+                GLib.Variant("(ss)", (service_name, "replace")),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
         except Exception:
             pass
 
-        self.proxy.DisableUnitFiles([timer_name, service_name], False)
-        
+        self.proxy.call_sync(
+            "DisableUnitFiles",
+            GLib.Variant("(asb)", ([timer_name, service_name], False)),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
+
         for ext in [".service", ".timer"]:
             path = os.path.join(self.UNIT_PATH, f"{self.PREFIX}{task_id}{ext}")
             if os.path.exists(path):
@@ -153,8 +186,14 @@ class SystemdManager:
                 stats = {"last": "なし", "next": "なし", "enabled": False}
 
                 # 有効化状態の確認 (ロードされていない場合も考慮してManagerから取得を試みる)
+                # GetUnitFileState(name) -> (state)
                 try:
-                    state = self.proxy.GetUnitFileState(timer_unit)
+                    state_variant = self.proxy.call_sync(
+                        "GetUnitFileState",
+                        GLib.Variant("(s)", (timer_unit,)),
+                        Gio.DBusCallFlags.NONE, -1, None
+                    )
+                    state = state_variant.unpack()[0]
                     if state == "enabled":
                         stats["enabled"] = True
                 except Exception:
@@ -197,16 +236,40 @@ class SystemdManager:
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
         if enabled:
-            self.proxy.EnableUnitFiles([service_name], False, True)
-            self.proxy.EnableUnitFiles([timer_name], False, True)
-            self.proxy.StartUnit(timer_name, "replace")
+            self.proxy.call_sync(
+                "EnableUnitFiles",
+                GLib.Variant("(asbb)", ([service_name], False, True)),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
+            self.proxy.call_sync(
+                "EnableUnitFiles",
+                GLib.Variant("(asbb)", ([timer_name], False, True)),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
+            self.proxy.call_sync(
+                "StartUnit",
+                GLib.Variant("(ss)", (timer_name, "replace")),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
         else:
             try:
-                self.proxy.StopUnit(timer_name, "replace")
-                self.proxy.StopUnit(service_name, "replace")
+                self.proxy.call_sync(
+                    "StopUnit",
+                    GLib.Variant("(ss)", (timer_name, "replace")),
+                    Gio.DBusCallFlags.NONE, -1, None
+                )
+                self.proxy.call_sync(
+                    "StopUnit",
+                    GLib.Variant("(ss)", (service_name, "replace")),
+                    Gio.DBusCallFlags.NONE, -1, None
+                )
             except Exception:
                 pass
-            self.proxy.DisableUnitFiles([timer_name, service_name], False)
+            self.proxy.call_sync(
+                "DisableUnitFiles",
+                GLib.Variant("(asb)", ([timer_name, service_name], False)),
+                Gio.DBusCallFlags.NONE, -1, None
+            )
 
     def validate_calendar(self, schedule):
         """systemd-analyze calendarを使用してスケジュールを検証する"""
