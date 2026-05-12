@@ -39,7 +39,8 @@ class SystemdManager:
             f.write(timer_content)
 
         self._run_systemctl("daemon-reload")
-        self._run_systemctl("enable", "--now", service_name, timer_name)
+        self._run_systemctl("enable", service_name)
+        self._run_systemctl("enable", "--now", timer_name)
 
     def delete_task(self, task_id):
         task_id = self._sanitize_id(task_id)
@@ -146,8 +147,11 @@ class SystemdManager:
         task_id = self._sanitize_id(task_id)
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
-        action = "enable" if enabled else "disable"
-        self._run_systemctl(action, "--now", service_name, timer_name)
+        if enabled:
+            self._run_systemctl("enable", service_name)
+            self._run_systemctl("enable", "--now", timer_name)
+        else:
+            self._run_systemctl("disable", "--now", service_name, timer_name)
 
     def validate_calendar(self, schedule):
         """systemd-analyze calendarを使用してスケジュールを検証する"""

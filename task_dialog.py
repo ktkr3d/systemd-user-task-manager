@@ -1,3 +1,4 @@
+import shlex
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -199,7 +200,7 @@ class TaskDialog(Adw.Window):
             try:
                 file = source.open_finish(result)
                 if file:
-                    self.cmd_entry.set_text(file.get_path())
+                    self.cmd_entry.set_text(shlex.quote(file.get_path()))
             except:
                 # ユーザーがキャンセルした場合やエラーが発生した場合
                 pass
