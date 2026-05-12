@@ -23,6 +23,10 @@ modules:
               - --share=network
       build-commands:
           - pip3 install --prefix=${FLATPAK_DEST} .
+          # Desktopファイル、アイコン、Metainfoを明示的にインストール
+          - install -Dm644 com.example.systemd-task-manager.desktop ${FLATPAK_DEST}/share/applications/com.example.systemd-task-manager.desktop
+          - install -Dm644 com.example.systemd-task-manager.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/com.example.systemd-task-manager.svg
+          - install -Dm644 com.example.systemd-task-manager.metainfo.xml ${FLATPAK_DEST}/share/metainfo/com.example.systemd-task-manager.metainfo.xml
       sources:
           - type: dir
             path: .

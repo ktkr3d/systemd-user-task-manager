@@ -5,6 +5,6 @@ Exec=systemd-user-task-manager
 Icon=com.example.systemd-task-manager
 Terminal=false
 Type=Application
-Categories=System;Utility;GTK;GNOME;
+Categories=Utility;System;Settings;
 StartupNotify=true
 Keywords=systemd;user;task;manager;timer;service;

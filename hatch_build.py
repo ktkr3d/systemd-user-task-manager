@@ -32,12 +32,6 @@ class CustomBuildHook(BuildHookInterface):
         # FlatpakやLinuxの標準的なディレクトリ構造にファイルを配置するための設定
         # キーはプロジェクトルートからの相対パス、値はインストール先（/app/ または /usr/）からの相対パス
         shared_data = build_data.get('shared-data', {})
-        shared_data.update({
-            "com.example.systemd-task-manager.desktop": "share/applications/com.example.systemd-task-manager.desktop",
-            "com.example.systemd-task-manager.svg": "share/icons/hicolor/scalable/apps/com.example.systemd-task-manager.svg",
-            "com.example.systemd-task-manager.metainfo.xml": "share/metainfo/com.example.systemd-task-manager.metainfo.xml",
-        })
-
         # コンパイルされた翻訳ファイルも含める
         if os.path.exists(locale_dir):
             for root, _, files in os.walk(locale_dir):
