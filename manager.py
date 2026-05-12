@@ -21,7 +21,7 @@ class SystemdManager:
         service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
 
-        service_content = f"[Unit]\nDescription=Task {task_id}\n\n[Service]\nExecStart={command}\n"
+        service_content = f"[Unit]\nDescription=Task {task_id}\n\n[Service]\nExecStart={command}\n\n[Install]\nWantedBy=default.target\n"
 
         if schedule.startswith("startup"):
             delay_val = "0"
@@ -39,12 +39,13 @@ class SystemdManager:
             f.write(timer_content)
 
         self._run_systemctl("daemon-reload")
-        self._run_systemctl("enable", "--now", timer_name)
+        self._run_systemctl("enable", "--now", service_name, timer_name)
 
     def delete_task(self, task_id):
         task_id = self._sanitize_id(task_id)
+        service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
-        self._run_systemctl("disable", "--now", timer_name)
+        self._run_systemctl("disable", "--now", service_name, timer_name)
         
         for ext in [".service", ".timer"]:
             path = os.path.join(self.UNIT_PATH, f"{self.PREFIX}{task_id}{ext}")
@@ -118,9 +119,10 @@ class SystemdManager:
 
     def toggle_task(self, task_id, enabled):
         task_id = self._sanitize_id(task_id)
+        service_name = f"{self.PREFIX}{task_id}.service"
         timer_name = f"{self.PREFIX}{task_id}.timer"
         action = "enable" if enabled else "disable"
-        self._run_systemctl(action, "--now", timer_name)
+        self._run_systemctl(action, "--now", service_name, timer_name)
 
     def validate_calendar(self, schedule):
         """systemd-analyze calendarを使用してスケジュールを検証する"""
