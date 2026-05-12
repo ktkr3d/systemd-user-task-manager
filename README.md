@@ -8,18 +8,18 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     ```bash
     sudo pacman -S python-gobject libadwaita
     ```
-2. ダウンロード
+2. 配布用パッケージ（Flatpak）のダウンロード
    https://github.com/ktkr3d/systemd-user-task-manager/releases
-3. インストール
+3. 生成されたバンドルファイルをインストール
     ```bash
-    python3 -m pip install --user dist/*.whl
+    flatpak install --user systemd-user-task-manager.flatpak
     ```
-4. 実行
+4. アプリケーションの実行
     ```bash
-    systemd-user-task-manager
+    flatpak run com.example.systemd-task-manager
     ```
 
-## ビ配布用パッケージのビルド
+## 配布用パッケージのビルド
 
 1. 前提パッケージ
     ```bash
