@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>com.example.systemd-task-manager</id>
-  <name>Systemd User Task Manager</name>
-  <summary>Manage systemd user services and timers</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
+  <name>Systemd User Task Manager</name>
+  <summary>Systemdのユーザサービス、ユーザタイマーを管理するアプリケーション</summary>
   <description>
     <p>
-      A GTK4/Libadwaita application to manage systemd user units as scheduled tasks.
-      It allows users to create, edit, and monitor services and timers with ease.
+      This application provides a graphical interface to manage systemd user services and timers.
+      It allows users to easily create, edit, enable, disable, and monitor their personal systemd units.
     </p>
   </description>
-  <launchable type="desktop-id">com.example.systemd-task-manager.desktop</launchable>
-  <url type="homepage">https://github.com/ktkr3d/systemd-user-task-manager</url>
   <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/systemd-user-task-manager.png</image>
+      <caption>Main application window showing task list.</caption>
+    </screenshot>
   </screenshots>
-  <content_rating type="oars-1.1" />
+  <url type="homepage">https://github.com/ktkr3d/systemd-user-task-manager</url>
+  <url type="bugtracker">https://github.com/ktkr3d/systemd-user-task-manager/issues</url>
+  <url type="vcs-browser">https://github.com/ktkr3d/systemd-user-task-manager</url>
+  <developer_name>ktkr3d</developer_name>
+  <launchable type="desktop-id">com.example.systemd-task-manager.desktop</launchable>
+  <!-- 必要に応じて、キーワードやカテゴリなどの他のメタデータを追加してください -->
+  <!-- 例:
+  <keywords>
+    <keyword>systemd</keyword><keyword>user service</keyword><keyword>timer</keyword><keyword>task manager</keyword>
+  </keywords>
+  <categories>
+    <category>Utility</category>
+    <category>System</category>
+  </categories>
+  -->
 </component>

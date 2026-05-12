@@ -27,6 +27,7 @@ modules:
           - install -Dm644 com.example.systemd-task-manager.desktop ${FLATPAK_DEST}/share/applications/com.example.systemd-task-manager.desktop
           - install -Dm644 com.example.systemd-task-manager.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/com.example.systemd-task-manager.svg
           - install -Dm644 com.example.systemd-task-manager.metainfo.xml ${FLATPAK_DEST}/share/metainfo/com.example.systemd-task-manager.metainfo.xml
+          - install -Dm644 data/screenshots/systemd-user-task-manager.png ${FLATPAK_DEST}/share/metainfo/screenshots/systemd-user-task-manager.png
       sources:
           - type: dir
             path: .

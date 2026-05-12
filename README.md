@@ -7,7 +7,8 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 1. 前提パッケージ
     ```bash
     sudo pacman -S python-gobject libadwaita
-    sudo flatpak install flathub org.gnome.Platform//46
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpak install flathub org.gnome.Platform//46
     ```
 2. 配布用パッケージ（Flatpak）のダウンロード
    https://github.com/ktkr3d/systemd-user-task-manager/releases
