@@ -11,7 +11,12 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+include = [
+    "main.py",
+    "manager.py",
+    "app_window.py",
+    "task_dialog.py",
+]
 artifacts = [
     "locale/**/*.mo",
     "com.example.systemd-task-manager.desktop",
@@ -24,4 +29,3 @@ path = "hatch_build.py"
 
 [project.scripts]
 systemd-user-task-manager = "main:main" # アプリケーション本体の実行
-systemd-user-task-manager-install-desktop = "main:install_desktop_entry" # .desktopファイルインストール用

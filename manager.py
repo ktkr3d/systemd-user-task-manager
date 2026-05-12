@@ -216,22 +216,24 @@ class SystemdManager:
             delay = "0"
             if ":" in schedule:
                 delay = schedule.split(":")[1]
-            return True, f"システム起動の {delay} 分後に実行"
+            return True, f"システム起動の {delay} 分後に実行" # OnBootSecはParseCalendarで検証できないため、ここでは簡易的にOKとする
 
         try:
-            res = subprocess.run(
-                ["systemd-analyze", "calendar", schedule],
-                capture_output=True, text=True, check=True
-            )
-            for line in res.stdout.splitlines():
-                if "Next elapse:" in line:
-                    return True, line.split(":", 1)[1].strip()
-        except FileNotFoundError:
-            return False, "systemd-analyze コマンドが見つかりません"
-        except subprocess.CalledProcessError as e:
-            # エラーメッセージを整形（プレフィックスを除去）
-            error_msg = e.stderr.splitlines()[0] if e.stderr else "無効な形式です"
-            if ":" in error_msg:
-                error_msg = error_msg.split(":", 1)[-1].strip()
-            return False, error_msg
-        return False, "検証できませんでした"
+            # D-Bus経由でParseCalendarを呼び出す
+            # ParseCalendar(calendar_string) -> (uint64_t next_usec, uint64_t accuracy_usec)
+            result = self.proxy.ParseCalendar(schedule)
+            next_usec = result[0]
+            
+            if next_usec > 0:
+                # systemdのD-Busはエポックからのマイクロ秒を返す
+                # datetime.fromtimestampは秒を期待するので、変換
+                dt = datetime.datetime.fromtimestamp(next_usec / 1000000)
+                return True, dt.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                return False, "無効な形式、または将来の時刻がありません"
+        except GLib.Error as e:
+            # D-Busエラーを捕捉し、エラーメッセージを返す
+            # 例: "Invalid calendar specification"
+            return False, e.message
+        except Exception as e:
+            return False, f"検証中に予期せぬエラーが発生しました: {e}"
