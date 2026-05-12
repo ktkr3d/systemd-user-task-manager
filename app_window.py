@@ -28,6 +28,7 @@ class AppWindow(Adw.ApplicationWindow):
         theme_menu.append("ダークテーマ", "win.change-theme('dark')")
         menu.append_submenu("テーマ", theme_menu)
 
+        menu.append("最新の情報に更新", "win.refresh")
         menu.append("ユニットファイルの場所を開く", "win.open-folder")
         menu.append("Systemd User Task Manager について", "win.about")
 
@@ -48,6 +49,10 @@ class AppWindow(Adw.ApplicationWindow):
         action_folder = Gio.SimpleAction.new("open-folder", None)
         action_folder.connect("activate", self.open_unit_folder)
         self.add_action(action_folder)
+
+        action_refresh = Gio.SimpleAction.new("refresh", None)
+        action_refresh.connect("activate", self.on_refresh)
+        self.add_action(action_refresh)
 
         action_about = Gio.SimpleAction.new("about", None)
         action_about.connect("activate", self.show_about)
@@ -121,6 +126,9 @@ class AppWindow(Adw.ApplicationWindow):
         self.manager.toggle_task(task_id, state)
         GLib.idle_add(self.refresh_list)
         return False
+
+    def on_refresh(self, action, param):
+        self.refresh_list()
 
     def open_unit_folder(self, action, param):
         # パスをURI形式 (file://...) に変換してデフォルトのアプリで開く
