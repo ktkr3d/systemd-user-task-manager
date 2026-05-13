@@ -2,7 +2,7 @@
 Name=Systemd User Task Manager
 Comment=Manage systemd user services and timers
 Exec=systemd-user-task-manager
-Icon=com.example.systemd-task-manager
+Icon=io.github.ktkr3d.systemd-user-task-manager
 Terminal=false
 Type=Application
 Categories=Utility;System;Settings;

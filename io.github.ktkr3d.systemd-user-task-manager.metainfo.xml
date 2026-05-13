@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.example.systemd-task-manager</id>
+  <id>io.github.ktkr3d.systemd-user-task-manager</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>Systemd User Task Manager</name>
@@ -21,7 +21,7 @@
   <url type="bugtracker">https://github.com/ktkr3d/systemd-user-task-manager/issues</url>
   <url type="vcs-browser">https://github.com/ktkr3d/systemd-user-task-manager</url>
   <developer_name>ktkr3d</developer_name>
-  <launchable type="desktop-id">com.example.systemd-task-manager.desktop</launchable>
+  <launchable type="desktop-id">io.github.ktkr3d.systemd-user-task-manager.desktop</launchable>
   <!-- 必要に応じて、キーワードやカテゴリなどの他のメタデータを追加してください -->
   <!-- 例:
   <keywords>

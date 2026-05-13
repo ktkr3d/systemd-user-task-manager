@@ -1,4 +1,4 @@
-app-id: com.example.systemd-task-manager
+app-id: io.github.ktkr3d.systemd-user-task-manager
 runtime: org.gnome.Platform
 runtime-version: "50"
 sdk: org.gnome.Sdk
@@ -24,9 +24,9 @@ modules:
       build-commands:
           - pip3 install --prefix=${FLATPAK_DEST} .
           # Desktopファイル、アイコン、Metainfoを明示的にインストール
-          - install -Dm644 com.example.systemd-task-manager.desktop ${FLATPAK_DEST}/share/applications/com.example.systemd-task-manager.desktop
-          - install -Dm644 com.example.systemd-task-manager.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/com.example.systemd-task-manager.svg
-          - install -Dm644 com.example.systemd-task-manager.metainfo.xml ${FLATPAK_DEST}/share/metainfo/com.example.systemd-task-manager.metainfo.xml
+          - install -Dm644 io.github.ktkr3d.systemd-user-task-manager.desktop ${FLATPAK_DEST}/share/applications/io.github.ktkr3d.systemd-user-task-manager.desktop
+          - install -Dm644 io.github.ktkr3d.systemd-user-task-manager.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/io.github.ktkr3d.systemd-user-task-manager.svg
+          - install -Dm644 io.github.ktkr3d.systemd-user-task-manager.metainfo.xml ${FLATPAK_DEST}/share/metainfo/io.github.ktkr3d.systemd-user-task-manager.metainfo.xml
       sources:
           - type: dir
             path: .
