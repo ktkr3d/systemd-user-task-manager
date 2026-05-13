@@ -19,9 +19,9 @@ include = [
 ]
 artifacts = [
     "locale/**/*.mo",
-    "com.example.systemd-task-manager.desktop",
-    "com.example.systemd-task-manager.svg",
-    "com.example.systemd-task-manager.metainfo.xml",
+    "io.github.ktkr3d.systemd-user-task-manager.desktop",
+    "io.github.ktkr3d.systemd-user-task-manager.svg",
+    "io.github.ktkr3d.systemd-user-task-manager.metainfo.xml",
 ]
 
 [tool.hatch.build.targets.wheel.hooks.custom]

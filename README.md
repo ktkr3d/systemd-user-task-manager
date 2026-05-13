@@ -7,6 +7,8 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 1. 前提パッケージ
     ```bash
     sudo pacman -S python-gobject libadwaita
+    ```
+    ```bash
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     flatpak install flathub org.gnome.Platform//50
     ```
@@ -20,6 +22,7 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     ```bash
     flatpak run com.example.systemd-task-manager
     ```
+    またはアプリケーションメニューから起動
 
 ## アンインストール
 
@@ -42,7 +45,7 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     ```bash
     sudo pacman -S python-hatch
     ```
-3. flatpak
+3. 前提Flatpakパッケージ
     ```bash
     # SDKのインストール（ビルド用）
     flatpak install flathub org.gnome.Sdk//50
@@ -53,15 +56,7 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     ```bash
     git clone https://github.com/ktkr3d/systemd-user-task-manager.git
     ```
-5. ビルド
-    ```bash
-    flatpak-builder --user --install --force-clean build-dir com.example.systemd-task-manager.yaml
-    ```
-6. アプリケーションの実行
-    ```bash
-    flatpak run com.example.systemd-task-manager
-    ```
-7. 配布用リポジトリの作成とバンドル化
+5. ビルドとFlatpakパッケージの生成
 
     ```bash
     # 1. まずリポジトリ(repo)としてエクスポートしながらビルド
@@ -69,4 +64,11 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 
     # 2. リポジトリから単一の .flatpak ファイルを生成
     flatpak build-bundle repo systemd-user-task-manager.flatpak com.example.systemd-task-manager
+    ```
+
+## クリーン
+
+1. ビルド
+    ```bash
+    flatpak-builder --force-clean build-dir com.example.systemd-task-manager.yaml
     ```

@@ -11,8 +11,8 @@ from gi.repository import Adw
 from app_window import AppWindow
 
 class TaskApp(Adw.Application):
-    def __init__(self):
-        super().__init__(application_id="com.example.systemd-task-manager")
+    def __init__(self, **kwargs):
+        super().__init__(application_id="io.github.ktkr3d.systemd-user-task-manager", **kwargs)
         self.setup_i18n()
 
     def setup_i18n(self):

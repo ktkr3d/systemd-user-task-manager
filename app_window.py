@@ -152,7 +152,7 @@ class AppWindow(Adw.ApplicationWindow):
         about = Adw.AboutWindow(
             transient_for=self,
             application_name="Systemd User Task Manager",
-            application_icon="com.example.systemd-task-manager",
+            application_icon="io.github.ktkr3d.systemd-user-task-manager",
             version="0.1.0",
             developer_name="ktkr3d",
             license_type=Gtk.License.GPL_3_0,
