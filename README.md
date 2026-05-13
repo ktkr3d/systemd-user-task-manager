@@ -20,7 +20,7 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     ```
 4. アプリケーションの実行
     ```bash
-    flatpak run com.example.systemd-task-manager
+    flatpak run io.github.ktkr3d.systemd-user-task-manager
     ```
     またはアプリケーションメニューから起動
 
@@ -28,7 +28,7 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 
 1. Flatpakパッケージの削除
     ```bash
-    flatpak uninstall --user com.example.systemd-task-manager
+    flatpak uninstall --user io.github.ktkr3d.systemd-user-task-manager
     ```
 2. （任意）作成されたsystemdユニットファイルの削除
     ```bash
@@ -60,15 +60,15 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 
     ```bash
     # 1. まずリポジトリ(repo)としてエクスポートしながらビルド
-    flatpak-builder --repo=repo --force-clean build-dir com.example.systemd-task-manager.yaml
+    flatpak-builder --repo=repo --force-clean build-dir io.github.ktkr3d.systemd-user-task-manager.yaml
 
     # 2. リポジトリから単一の .flatpak ファイルを生成
-    flatpak build-bundle repo systemd-user-task-manager.flatpak com.example.systemd-task-manager
+    flatpak build-bundle repo systemd-user-task-manager.flatpak io.github.ktkr3d.systemd-user-task-manager
     ```
 
 ## クリーン
 
 1. ビルド
     ```bash
-    flatpak-builder --force-clean build-dir com.example.systemd-task-manager.yaml
+    flatpak-builder --force-clean build-dir io.github.ktkr3d.systemd-user-task-manager.yaml
     ```
