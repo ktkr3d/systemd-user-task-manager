@@ -76,37 +76,47 @@ class SystemdManager:
     def _get_unit_properties(self, unit_name):
         """D-Bus経由でユニットのプロパティを取得します。"""
         try:
-            # GetUnitはユニットがロードされていない場合に例外を投げます
+            # LoadUnitを使用することで、ユニットがロードされていない場合でもディスクから読み込んでパスを取得します
             path_variant = self.proxy.call_sync(
-                "GetUnit",
+                "LoadUnit",
                 GLib.Variant("(s)", (unit_name,)),
                 Gio.DBusCallFlags.NONE, -1, None
             )
             path = path_variant.unpack()[0]
             
-            # Unitインターフェースのプロパティを取得
-            unit_props = self.bus.call_sync(
-                "org.freedesktop.systemd1",
-                path,
-                "org.freedesktop.DBus.Properties",
-                "GetAll",
-                GLib.Variant("(s)", ["org.freedesktop.systemd1.Unit"]),
-                None, Gio.DBusCallFlags.NONE, -1, None
-            ).unpack()[0]
+            all_props = {}
+            # 取得対象のインターフェース（Unit基本情報 + タイマー/サービス固有情報）
+            ifaces = ["org.freedesktop.systemd1.Unit"]
+            if unit_name.endswith(".timer"):
+                ifaces.append("org.freedesktop.systemd1.Timer")
+            else:
+                ifaces.append("org.freedesktop.systemd1.Service")
+
+            for iface in ifaces:
+                try:
+                    result = self.bus.call_sync(
+                        "org.freedesktop.systemd1",
+                        path,
+                        "org.freedesktop.DBus.Properties",
+                        "GetAll",
+                        GLib.Variant("(s)", (iface,)),
+                        GLib.VariantType.new("(a{sv})"),
+                        Gio.DBusCallFlags.NONE, -1, None
+                    )
+                    if result:
+                        # resultは (a{sv},) というタプル形式なので、辞書を取り出して各値をunpackする
+                        props_dict = result.unpack()[0]
+                        for k, v in props_dict.items():
+                            # Variantが入れ子になっている場合があるため、再帰的にunpackする
+                            val = v
+                            while isinstance(val, GLib.Variant):
+                                val = val.unpack()
+                            all_props[k] = val
+                except Exception as e:
+                    print(f"Error getting properties for {iface}: {e}")
+                    continue
             
-            # タイマーまたはサービス固有のプロパティを取得
-            iface = "org.freedesktop.systemd1.Timer" if unit_name.endswith(".timer") else "org.freedesktop.systemd1.Service"
-            spec_props = self.bus.call_sync(
-                "org.freedesktop.systemd1",
-                path,
-                "org.freedesktop.DBus.Properties",
-                "GetAll",
-                GLib.Variant("(s)", [iface]),
-                None, Gio.DBusCallFlags.NONE, -1, None
-            ).unpack()[0]
-            
-            unit_props.update(spec_props)
-            return unit_props
+            return all_props
         except Exception:
             return {}
 
@@ -140,7 +150,11 @@ class SystemdManager:
             if os.path.exists(path):
                 os.remove(path)
         
-        self.proxy.Reload()
+        self.proxy.call_sync(
+            "Reload",
+            GLib.Variant("()", ()),
+            Gio.DBusCallFlags.NONE, -1, None
+        )
 
     def list_tasks(self):
         tasks = []
@@ -201,7 +215,8 @@ class SystemdManager:
                         stats["enabled"] = True
 
                 # 前回実行時刻の取得 (D-Busからはマイクロ秒単位の数値が返ります)
-                last_usec = t_props.get("LastTriggerUSecRealtime", 0)
+                # LastTriggerUSecRealtime または LastTriggerUSec (monotonic) を確認
+                last_usec = t_props.get("LastTriggerUSecRealtime") or t_props.get("LastTriggerUSec", 0)
                 if not last_usec:
                     # タイマーの記録がない場合、サービスの開始/終了時刻をフォールバックとして使用
                     last_usec = s_props.get("ExecMainExitTimestampRealtime", 0) or \
@@ -211,7 +226,7 @@ class SystemdManager:
                 stats["last"] = self._format_usec(last_usec) or "なし"
 
                 # 次回実行予定
-                next_usec = t_props.get("NextElapseUSecRealtime", 0)
+                next_usec = t_props.get("NextElapseUSecRealtime") or t_props.get("NextElapseUSec", 0)
                 stats["next"] = self._format_usec(next_usec) or "なし"
 
                 tasks.append({
@@ -284,8 +299,19 @@ class SystemdManager:
         try:
             # D-Bus経由でParseCalendarを呼び出す
             # ParseCalendar(calendar_string) -> (uint64_t next_usec, uint64_t accuracy_usec)
-            result = self.proxy.ParseCalendar(schedule)
-            next_usec = result[0]
+            result = self.bus.call_sync(
+                "org.freedesktop.systemd1",
+                "/org/freedesktop/systemd1",
+                "org.freedesktop.systemd1.Manager",
+                "ParseCalendar",
+                GLib.Variant("(s)", (schedule,)),
+                None,
+                Gio.DBusCallFlags.NONE,
+                -1,
+                None
+            )
+            # 戻り値は (uint64, uint64) のタプル
+            next_usec, _ = result.unpack()
             
             if next_usec > 0:
                 # systemdのD-Busはエポックからのマイクロ秒を返す

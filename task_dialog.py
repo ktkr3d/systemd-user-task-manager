@@ -52,7 +52,8 @@ class TaskDialog(Adw.Window):
         self.combo_row = Adw.ComboRow(title=_("スケジュール（プリセット）"), model=model)
         self.combo_handler_id = self.combo_row.connect("notify::selected", self.on_combo_changed)
 
-        self.schedule_entry = Adw.EntryRow(title=_("スケジュール (OnCalendar)"), text="hourly")
+        self.schedule_entry = Adw.EntryRow(title=_("スケジュール (OnCalendar)"))
+        self.schedule_entry.set_text("hourly")
         self.schedule_entry.set_tooltip_text(
             _("systemdの時刻指定形式（OnCalendar）を入力します。\n\n"
               "主な例:\n"
@@ -128,13 +129,9 @@ class TaskDialog(Adw.Window):
                 self.schedule_entry.set_text("")
                 self._updating = False
 
-        # 常に表示状態（delay_rowの可視性など）を更新
         self.on_input_changed()
 
     def on_input_changed(self, *args):
-        if self._updating:
-            return
-
         name = self.name_entry.get_text().strip()
         cmd = self.cmd_entry.get_text()
         schedule = self.schedule_entry.get_text()
@@ -165,10 +162,8 @@ class TaskDialog(Adw.Window):
             self.combo_row.set_selected(matched_idx)
             self._updating = False
 
-        valid_schedule, next_run = self.manager.validate_calendar(full_schedule)
-        
-        # 保存ボタンの有効化条件: 名前、コマンドがあり、かつスケジュールが有効
-        is_valid = bool(name) and bool(cmd) and valid_schedule
+        # 一旦スケジュールのバリデーションをスキップし、名前とコマンドがあれば保存可能にする
+        is_valid = bool(name) and bool(cmd)
         self.save_btn.set_sensitive(is_valid)
 
     def on_save(self, btn):
