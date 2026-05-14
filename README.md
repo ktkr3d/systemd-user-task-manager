@@ -68,7 +68,11 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
 
 ## クリーン
 
-1. ビルド
+1. クリーン
     ```bash
     flatpak-builder --force-clean build-dir io.github.ktkr3d.systemd-user-task-manager.yaml
+    ```
+2. パッケージ削除
+    ```bash
+    rm systemd-user-task-manager.flatpak
     ```
