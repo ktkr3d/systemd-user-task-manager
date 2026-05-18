@@ -10,9 +10,9 @@ class SystemdManager:
 
     def __init__(self):
         os.makedirs(self.UNIT_PATH, exist_ok=True)
-        # --userに相当するセッションバスを取得
+        # Get the session bus corresponding to --user
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-        # systemdのManagerプロキシを作成
+        # Create the systemd Manager proxy
         self.proxy = Gio.DBusProxy.new_sync(
             self.bus,
             Gio.DBusProxyFlags.NONE,
@@ -24,7 +24,7 @@ class SystemdManager:
         )
 
     def _sanitize_id(self, task_id):
-        # 空白や記号をハイフンに置換し、英数字・ハイフン・アンダースコアのみを許容する
+        # Replace spaces and symbols with hyphens, allowing only alphanumeric characters, hyphens, and underscores
         return re.sub(r'[^a-zA-Z0-9_-]', '-', task_id)
 
     def save_task(self, task_id, command, schedule, persistent):
@@ -49,7 +49,7 @@ class SystemdManager:
         with open(os.path.join(self.UNIT_PATH, timer_name), "w") as f:
             f.write(timer_content)
 
-        # D-Bus経由で操作
+        # Operate via D-Bus
         self.proxy.call_sync(
             "Reload",
             GLib.Variant("()", ()),
@@ -66,7 +66,7 @@ class SystemdManager:
             GLib.Variant("(asbb)", ([timer_name], False, True)),
             Gio.DBusCallFlags.NONE, -1, None
         )
-        # タイマーを開始
+        # Start the timer
         self.proxy.call_sync(
             "StartUnit",
             GLib.Variant("(ss)", (timer_name, "replace")),
@@ -74,9 +74,9 @@ class SystemdManager:
         )
 
     def _get_unit_properties(self, unit_name):
-        """D-Bus経由でユニットのプロパティを取得します。"""
+        """Gets unit properties via D-Bus."""
         try:
-            # LoadUnitを使用することで、ユニットがロードされていない場合でもディスクから読み込んでパスを取得します
+            # Using LoadUnit reads the unit from disk and retrieves the path even if it's not loaded
             path_variant = self.proxy.call_sync(
                 "LoadUnit",
                 GLib.Variant("(s)", (unit_name,)),
@@ -85,7 +85,7 @@ class SystemdManager:
             path = path_variant.unpack()[0]
             
             all_props = {}
-            # 取得対象のインターフェース（Unit基本情報 + タイマー/サービス固有情報）
+            # Interfaces to retrieve (Unit basic info + Timer/Service specific info)
             ifaces = ["org.freedesktop.systemd1.Unit"]
             if unit_name.endswith(".timer"):
                 ifaces.append("org.freedesktop.systemd1.Timer")
@@ -104,10 +104,10 @@ class SystemdManager:
                         Gio.DBusCallFlags.NONE, -1, None
                     )
                     if result:
-                        # resultは (a{sv},) というタプル形式なので、辞書を取り出して各値をunpackする
+                        # Since result is in (a{sv},) tuple format, extract the dictionary and unpack each value
                         props_dict = result.unpack()[0]
                         for k, v in props_dict.items():
-                            # Variantが入れ子になっている場合があるため、再帰的にunpackする
+                            # Recursively unpack as Variants might be nested
                             val = v
                             while isinstance(val, GLib.Variant):
                                 val = val.unpack()
@@ -164,7 +164,7 @@ class SystemdManager:
         for filename in os.listdir(self.UNIT_PATH):
             if filename.startswith(self.PREFIX) and filename.endswith(".timer"):
                 task_id = filename[len(self.PREFIX):-6]
-                # タイマーファイルからスケジュールを簡易パース
+                # Simple parsing of the schedule from the timer file
                 schedule = ""
                 persistent = False
                 with open(os.path.join(self.UNIT_PATH, filename), "r") as f:
@@ -173,14 +173,14 @@ class SystemdManager:
                             schedule = line.split("=")[1].strip()
                         elif line.startswith("OnBootSec="):
                             val = line.split("=")[1].strip()
-                            # 数値部分のみを抽出して 'startup:X' 形式にする
+                            # Extract only the numerical part and format as 'startup:X'
                             match = re.search(r'(\d+)', val)
                             delay = match.group(1) if match else "0"
                             schedule = f"startup:{delay}"
                         elif line.startswith("Persistent="):
                             persistent = line.split("=")[1].strip().lower() == "true"
                 
-                # サービスファイルからコマンドを取得
+                # Get command from the service file
                 command = ""
                 service_file = filename.replace(".timer", ".service")
                 service_path = os.path.join(self.UNIT_PATH, service_file)
@@ -190,16 +190,16 @@ class SystemdManager:
                             if line.startswith("ExecStart="):
                                 command = line.split("=")[1].strip()
 
-                # ユニットの状態を取得 (前回・次回の実行時刻)
+                # Get unit status (last/next execution time)
                 timer_unit = f"{self.PREFIX}{task_id}.timer"
                 service_unit = f"{self.PREFIX}{task_id}.service"
 
                 t_props = self._get_unit_properties(timer_unit)
                 s_props = self._get_unit_properties(service_unit)
 
-                stats = {"last": "なし", "next": "なし", "enabled": False}
+                stats = {"last": "None", "next": "None", "enabled": False}
 
-                # 有効化状態の確認 (ロードされていない場合も考慮してManagerから取得を試みる)
+                # Check enablement status (try retrieving from Manager considering it might not be loaded)
                 # GetUnitFileState(name) -> (state)
                 try:
                     state_variant = self.proxy.call_sync(
@@ -214,20 +214,20 @@ class SystemdManager:
                     if t_props.get("UnitFileState") == "enabled":
                         stats["enabled"] = True
 
-                # 前回実行時刻の取得 (D-Busからはマイクロ秒単位の数値が返ります)
-                # LastTriggerUSecRealtime または LastTriggerUSec (monotonic) を確認
+                # Get last execution time (D-Bus returns values in microseconds)
+                # Check LastTriggerUSecRealtime or LastTriggerUSec (monotonic)
                 last_usec = t_props.get("LastTriggerUSecRealtime") or t_props.get("LastTriggerUSec", 0)
                 if not last_usec:
-                    # タイマーの記録がない場合、サービスの開始/終了時刻をフォールバックとして使用
+                    # If no timer record exists, use service start/stop timestamps as fallback
                     last_usec = s_props.get("ExecMainExitTimestampRealtime", 0) or \
                                 s_props.get("ActiveEnterTimestampRealtime", 0) or \
                                 s_props.get("InactiveEnterTimestampRealtime", 0)
 
-                stats["last"] = self._format_usec(last_usec) or "なし"
+                stats["last"] = self._format_usec(last_usec) or "None"
 
-                # 次回実行予定
+                # Next scheduled execution
                 next_usec = t_props.get("NextElapseUSecRealtime") or t_props.get("NextElapseUSec", 0)
-                stats["next"] = self._format_usec(next_usec) or "なし"
+                stats["next"] = self._format_usec(next_usec) or "None"
 
                 tasks.append({
                     "id": task_id, 
@@ -287,17 +287,17 @@ class SystemdManager:
             )
 
     def validate_calendar(self, schedule):
-        """systemd-analyze calendarを使用してスケジュールを検証する"""
+        """Validate schedule using systemd-analyze calendar"""
         if not schedule:
-            return False, "スケジュールを入力してください"
+            return False, _("Please enter a schedule")
         if schedule.startswith("startup"):
             delay = "0"
             if ":" in schedule:
                 delay = schedule.split(":")[1]
-            return True, f"システム起動の {delay} 分後に実行" # OnBootSecはParseCalendarで検証できないため、ここでは簡易的にOKとする
+            return True, _("Run {} minutes after system boot").format(delay) # OnBootSec cannot be validated with ParseCalendar, so we'll just accept it here
 
         try:
-            # D-Bus経由でParseCalendarを呼び出す
+            # Call ParseCalendar via D-Bus
             # ParseCalendar(calendar_string) -> (uint64_t next_usec, uint64_t accuracy_usec)
             result = self.bus.call_sync(
                 "org.freedesktop.systemd1",
@@ -310,19 +310,19 @@ class SystemdManager:
                 -1,
                 None
             )
-            # 戻り値は (uint64, uint64) のタプル
+            # Return value is a (uint64, uint64) tuple
             next_usec, _ = result.unpack()
             
             if next_usec > 0:
-                # systemdのD-Busはエポックからのマイクロ秒を返す
-                # datetime.fromtimestampは秒を期待するので、変換
+                # systemd D-Bus returns microseconds since epoch
+                # datetime.fromtimestamp expects seconds, so convert it
                 dt = datetime.datetime.fromtimestamp(next_usec / 1000000)
                 return True, dt.strftime("%Y-%m-%d %H:%M:%S")
             else:
-                return False, "無効な形式、または将来の時刻がありません"
+                return False, _("Invalid format or no future time")
         except GLib.Error as e:
-            # D-Busエラーを捕捉し、エラーメッセージを返す
-            # 例: "Invalid calendar specification"
+            # Catch D-Bus errors and return the error message
+            # Example: "Invalid calendar specification"
             return False, e.message
         except Exception as e:
-            return False, f"検証中に予期せぬエラーが発生しました: {e}"
+            return False, _("An unexpected error occurred during validation: {}").format(e)

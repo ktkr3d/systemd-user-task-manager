@@ -7,7 +7,7 @@ from gi.repository import Gtk, Adw
 class TaskDialog(Adw.Window):
     def __init__(self, parent, manager, task_data=None):
         super().__init__(transient_for=parent, modal=True)
-        self.set_title(_("タスクの設定"))
+        self.set_title(_("Task Settings"))
         self.set_default_size(400, -1)
 
         self.manager = manager
@@ -20,53 +20,53 @@ class TaskDialog(Adw.Window):
         header = Adw.HeaderBar()
         main_box.append(header)
 
-        cancel_btn = Gtk.Button(label=_("キャンセル"))
+        cancel_btn = Gtk.Button(label=_("Cancel"))
         cancel_btn.connect("clicked", lambda _: self.close())
         header.pack_start(cancel_btn)
 
-        self.save_btn = Gtk.Button(label=_("保存"))
+        self.save_btn = Gtk.Button(label=_("Save"))
         self.save_btn.add_css_class("suggested-action")
         self.save_btn.connect("clicked", self.on_save)
         header.pack_end(self.save_btn)
 
         group = Adw.PreferencesGroup()
         
-        self.name_entry = Adw.EntryRow(title=_("タスク名 (ID)"))
+        self.name_entry = Adw.EntryRow(title=_("Task ID"))
 
-        self.cmd_entry = Adw.EntryRow(title=_("実行コマンド"))
+        self.cmd_entry = Adw.EntryRow(title=_("Command to execute"))
         self.file_chooser_btn = Gtk.Button(icon_name="document-open-symbolic")
-        self.file_chooser_btn.set_tooltip_text(_("ファイルを選択"))
+        self.file_chooser_btn.set_tooltip_text(_("Select file"))
         self.file_chooser_btn.connect("clicked", self.on_select_command_file)
         self.cmd_entry.add_suffix(self.file_chooser_btn)
 
         self.delay_spin = Gtk.SpinButton.new_with_range(0, 1440, 1)
-        self.delay_row = Adw.ActionRow(title=_("起動後の遅延 (分)"))
+        self.delay_row = Adw.ActionRow(title=_("Delay after boot (min)"))
         self.delay_row.add_suffix(self.delay_spin)
 
-        self.persistent_row = Adw.SwitchRow(title=_("停止中の実行漏れを次回起動時に実行 (Persistent)"))
+        self.persistent_row = Adw.SwitchRow(title=_("Execute missed tasks on next boot (Persistent)"))
 
-        self.preset_labels = [_("カスタム"), _("起動時"), _("毎時"), _("毎日"), _("毎週"), _("毎月")]
+        self.preset_labels = [_("Custom"), _("At Startup"), _("Hourly"), _("Daily"), _("Weekly"), _("Monthly")]
         self.preset_values = [None, "startup", "hourly", "daily", "weekly", "monthly"]
 
         model = Gtk.StringList.new(self.preset_labels)
-        self.combo_row = Adw.ComboRow(title=_("スケジュール（プリセット）"), model=model)
+        self.combo_row = Adw.ComboRow(title=_("Schedule (Preset)"), model=model)
         self.combo_handler_id = self.combo_row.connect("notify::selected", self.on_combo_changed)
 
-        self.schedule_entry = Adw.EntryRow(title=_("スケジュール (OnCalendar)"))
+        self.schedule_entry = Adw.EntryRow(title=_("Schedule (OnCalendar)"))
         self.schedule_entry.set_text("hourly")
         self.schedule_entry.set_tooltip_text(
-            _("systemdの時刻指定形式（OnCalendar）を入力します。\n\n"
-              "主な例:\n"
-              "・hourly, daily, weekly, monthly\n"
-              "・12:00 (毎日12:00)\n"
-              "・Mon 09:00 (毎週月曜 09:00)\n"
-              "・*:00/15 (15分おき)\n"
-              "・*-*-01 00:00 (毎月1日)")
+            _("Enter systemd time format (OnCalendar).\n\n"
+              "Examples:\n"
+              "- hourly, daily, weekly, monthly\n"
+              "- 12:00 (Every day at 12:00)\n"
+              "- Mon 09:00 (Every Monday at 09:00)\n"
+              "- *:00/15 (Every 15 minutes)\n"
+              "- *-*-01 00:00 (1st of every month)")
         )
         
         if task_data:
             self.name_entry.set_text(task_data['id'])
-            self.name_entry.set_editable(False) # IDの変更は不可
+            self.name_entry.set_editable(False) # ID cannot be changed
             self.cmd_entry.set_text(task_data.get('command', ''))
 
             sched = task_data['schedule']
@@ -81,7 +81,7 @@ class TaskDialog(Adw.Window):
                 self.schedule_entry.set_text(sched)
             self.persistent_row.set_active(task_data.get('persistent', False))
 
-            # 初期値に基づいてコンボボックスの選択状態を復元
+            # Restore combo box selection based on initial value
             idx = 0
             for i, val in enumerate(self.preset_values):
                 if val == task_data['schedule']:
@@ -96,7 +96,10 @@ class TaskDialog(Adw.Window):
         group.add(self.delay_row)
         group.add(self.persistent_row)
 
-        # 入力変更時のバリデーション接続
+        self.status_row = Adw.ActionRow(title=_("Validation result"))
+        group.add(self.status_row)
+
+        # Connect validation on input change
         self.name_entry.connect("changed", self.on_input_changed)
         self.cmd_entry.connect("changed", self.on_input_changed)
         self.schedule_entry.connect("changed", self.on_input_changed)
@@ -123,7 +126,7 @@ class TaskDialog(Adw.Window):
                 self.schedule_entry.set_text(val)
                 self._updating = False
         else:
-            # 「カスタム」選択時、プリセット用キーワードが含まれているならクリアしてモード切替を促す
+            # When "Custom" is selected, clear if it contains preset keywords to prompt mode switch
             if current_text.startswith("startup") or any(v == current_text for v in self.preset_values if v):
                 self._updating = True
                 self.schedule_entry.set_text("")
@@ -136,19 +139,19 @@ class TaskDialog(Adw.Window):
         cmd = self.cmd_entry.get_text()
         schedule = self.schedule_entry.get_text()
 
-        # 起動時設定の場合のUI切り替え
+        # UI switching for startup configuration
         is_startup = schedule.startswith("startup")
         self.delay_row.set_visible(is_startup)
         self.schedule_entry.set_visible(not is_startup)
         self.persistent_row.set_visible(not is_startup)
 
-        # バリデーション用のフルスケジュール文字列を作成
+        # Create full schedule string for validation
         full_schedule = schedule
         if is_startup:
             delay = int(self.delay_spin.get_value())
             full_schedule = f"startup:{delay}"
 
-        # 入力内容に合わせてコンボの選択状態を更新（シグナルの無限ループ防止のため一時ブロック）
+        # Update combo selection according to input content (temporarily blocked to prevent infinite loops)
         matched_idx = 0
         for i, p_val in enumerate(self.preset_values):
             if not p_val: continue
@@ -156,15 +159,17 @@ class TaskDialog(Adw.Window):
                 matched_idx = i
                 break
         
-        # コンボボックスの選択が実際に変わる場合のみ更新
+        # Update only if the combo box selection actually changes
         if self.combo_row.get_selected() != matched_idx:
             self._updating = True
             self.combo_row.set_selected(matched_idx)
             self._updating = False
 
-        # 一旦スケジュールのバリデーションをスキップし、名前とコマンドがあれば保存可能にする
-        is_valid = bool(name) and bool(cmd)
-        self.save_btn.set_sensitive(is_valid)
+        # Real-time schedule validation using systemd-analyze logic via DBus
+        is_cal_valid, cal_msg = self.manager.validate_calendar(full_schedule)
+        self.status_row.set_subtitle(cal_msg)
+
+        self.save_btn.set_sensitive(bool(name) and bool(cmd) and is_cal_valid)
 
     def on_save(self, btn):
         self.success = True
@@ -183,7 +188,7 @@ class TaskDialog(Adw.Window):
         }
 
     def on_select_command_file(self, button):
-        dialog = Gtk.FileDialog(title=_("コマンドファイルを選択"))
+        dialog = Gtk.FileDialog(title=_("Select command file"))
 
         def on_open_finished(source, result):
             try:
@@ -191,7 +196,7 @@ class TaskDialog(Adw.Window):
                 if file:
                     self.cmd_entry.set_text(shlex.quote(file.get_path()))
             except:
-                # ユーザーがキャンセルした場合やエラーが発生した場合
+                # Handle user cancellation or errors
                 pass
 
         dialog.open(self, None, on_open_finished)

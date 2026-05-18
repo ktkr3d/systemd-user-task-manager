@@ -17,16 +17,16 @@ class TaskApp(Adw.Application):
 
     def setup_i18n(self):
         domain = "systemd-user-task-manager"
-        # 1. 開発用（ソースツリー内）
+        # 1. For development (within the source tree)
         locale_dir = os.path.join(os.path.dirname(__file__), 'locale')
         
-        # 2. インストール済み環境用（/app/share/locale など）
+        # 2. For installed environments (e.g., /app/share/locale)
         if not os.path.exists(locale_dir):
             locale_dir = os.path.join(sys.prefix, 'share', 'locale')
 
         gettext.bindtextdomain(domain, locale_dir)
         gettext.textdomain(domain)
-        gettext.install(domain, locale_dir) # _() をグローバルに登録
+        gettext.install(domain, locale_dir) # Register _() globally
 
     def do_activate(self):
         win = AppWindow(application=self)

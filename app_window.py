@@ -19,25 +19,25 @@ class AppWindow(Adw.ApplicationWindow):
         add_btn.connect("clicked", self.show_add_dialog)
         header.pack_start(add_btn)
 
-        # プライマリーメニュー（三点リーダー）の作成
+        # Create primary menu (three-dot menu)
         menu = Gio.Menu.new()
 
         theme_menu = Gio.Menu.new()
-        theme_menu.append(_("システム設定に従う"), "win.change-theme('default')")
-        theme_menu.append(_("ライトテーマ"), "win.change-theme('light')")
-        theme_menu.append(_("ダークテーマ"), "win.change-theme('dark')")
-        menu.append_submenu(_("テーマ"), theme_menu)
+        theme_menu.append(_("Follow system settings"), "win.change-theme('default')")
+        theme_menu.append(_("Light theme"), "win.change-theme('light')")
+        theme_menu.append(_("Dark theme"), "win.change-theme('dark')")
+        menu.append_submenu(_("Theme"), theme_menu)
 
-        menu.append(_("最新の情報に更新"), "win.refresh")
-        menu.append(_("ユニットファイルの場所を開く"), "win.open-folder")
-        menu.append(_("Systemd User Task Manager について"), "win.about")
+        menu.append(_("Refresh"), "win.refresh")
+        menu.append(_("Open unit files folder"), "win.open-folder")
+        menu.append(_("About Systemd User Task Manager"), "win.about")
 
         menu_btn = Gtk.MenuButton(icon_name="view-more-symbolic", menu_model=menu)
         header.pack_end(menu_btn)
 
         self.view.add_top_bar(header)
 
-        # アクションの定義
+        # Define actions
         action_theme = Gio.SimpleAction.new_stateful(
             "change-theme",
             GLib.VariantType.new("s"),
@@ -72,19 +72,19 @@ class AppWindow(Adw.ApplicationWindow):
         self.refresh_list()
 
     def refresh_list(self):
-        # クリア
+        # Clear
         while (child := self.list_box.get_first_child()):
             self.list_box.remove(child)
         
-        # ロード
+        # Load
         for task in self.manager.list_tasks():
-            # スケジュールと実行時間をサブタイトルに表示
-            subtitle = (_("次回: {}\n前回: {} ({})")
+            # Display schedule and execution times in the subtitle
+            subtitle = (_("Next: {}\nLast: {} ({})")
                         .format(task['next'], task['last'], task['schedule']))
             
             row = Adw.ActionRow(title=task['id'], subtitle=subtitle)
             
-            # 有効/無効スイッチ
+            # Enable/Disable switch
             switch = Gtk.Switch(active=task['enabled'])
             switch.set_valign(Gtk.Align.CENTER)
             switch.set_margin_end(12)
@@ -131,7 +131,7 @@ class AppWindow(Adw.ApplicationWindow):
         self.refresh_list()
 
     def open_unit_folder(self, action, param):
-        # パスをURI形式 (file://...) に変換してデフォルトのアプリで開く
+        # Convert path to URI format (file://...) and open with default app
         uri = GLib.filename_to_uri(self.manager.UNIT_PATH, None)
         Gio.AppInfo.launch_default_for_uri(uri, None)
 
@@ -163,12 +163,12 @@ class AppWindow(Adw.ApplicationWindow):
     def delete_task(self, task_id):
         dialog = Adw.MessageDialog(
             transient_for=self,
-            heading=_("タスクを削除しますか？"),
-            body=_("タスク「{}」を削除します。この操作は取り消せません。").format(task_id),
+            heading=_("Delete task?"),
+            body=_("Task \"{}\" will be deleted. This action cannot be undone.").format(task_id),
         )
 
-        dialog.add_response("cancel", _("キャンセル"))
-        dialog.add_response("delete", _("削除"))
+        dialog.add_response("cancel", _("Cancel"))
+        dialog.add_response("delete", _("Delete"))
         dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
         dialog.set_default_response("cancel")
         dialog.set_close_response("cancel")

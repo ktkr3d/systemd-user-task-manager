@@ -12,103 +12,119 @@ msgstr ""
 "Generated-By: xgettext 0.21\n"
 
 #: task_dialog.py:12
-msgid "タスクの設定"
+msgid "Task Settings"
 msgstr ""
 
 #: task_dialog.py:25 app_window.py:141
-msgid "キャンセル"
+msgid "Cancel"
 msgstr ""
 
 #: task_dialog.py:29
-msgid "保存"
+msgid "Save"
 msgstr ""
 
 #: task_dialog.py:37
-msgid "タスク名 (ID)"
+msgid "Task ID"
 msgstr ""
 
 #: task_dialog.py:39
-msgid "実行コマンド"
+msgid "Command to execute"
 msgstr ""
 
 #: task_dialog.py:41
-msgid "ファイルを選択"
+msgid "Select file"
 msgstr ""
 
 #: task_dialog.py:46
-msgid "起動後の遅延 (分)"
+msgid "Delay after boot (min)"
 msgstr ""
 
 #: task_dialog.py:49
-msgid "停止中の実行漏れを次回起動時に実行 (Persistent)"
+msgid "Execute missed tasks on next boot (Persistent)"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "カスタム"
+msgid "Custom"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "起動時"
+msgid "At Startup"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "毎時"
+msgid "Hourly"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "毎日"
+msgid "Daily"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "毎週"
+msgid "Weekly"
 msgstr ""
 
 #: task_dialog.py:51
-msgid "毎月"
+msgid "Monthly"
 msgstr ""
 
 #: task_dialog.py:55
-msgid "スケジュール（プリセット）"
+msgid "Schedule (Preset)"
 msgstr ""
 
 #: task_dialog.py:58
-msgid "スケジュール (OnCalendar)"
+msgid "Schedule (OnCalendar)"
 msgstr ""
 
 #: task_dialog.py:60
 msgid ""
-"systemdの時刻指定形式（OnCalendar）を入力します。\n"
+"Enter systemd time format (OnCalendar).\n"
 "\n"
-"主な例:\n"
-"・hourly, daily, weekly, monthly\n"
-"・12:00 (毎日12:00)\n"
-"・Mon 09:00 (毎週月曜 09:00)\n"
-"・*:00/15 (15分おき)\n"
-"・*-*-01 00:00 (毎月1日)"
+"Examples:\n"
+"- hourly, daily, weekly, monthly\n"
+"- 12:00 (Every day at 12:00)\n"
+"- Mon 09:00 (Every Monday at 09:00)\n"
+"- *:00/15 (Every 15 minutes)\n"
+"- *-*-01 00:00 (1st of every month)"
 msgstr ""
 
 #: task_dialog.py:185
-msgid "コマンドファイルを選択"
+msgid "Select command file"
 msgstr ""
 
 #: app_window.py:24
-msgid "システム設定に従う"
+msgid "Follow system settings"
 msgstr ""
 
 #: app_window.py:25
-msgid "ライトテーマ"
+msgid "Light theme"
 msgstr ""
 
 #: app_window.py:26
-msgid "ダークテーマ"
+msgid "Dark theme"
 msgstr ""
 
 #: app_window.py:27
-msgid "テーマ"
+msgid "Theme"
 msgstr ""
 
 #: app_window.py:77
 msgid ""
-"次回: {}\n"
-"前回: {} ({})"
+"Next: {}\n"
+"Last: {} ({})"
+msgstr ""
+
+#: manager.py:277
+msgid "Please enter a schedule"
+msgstr ""
+
+#: manager.py:282
+msgid "Run {} minutes after system boot"
+msgstr ""
+
+#: manager.py:307
+msgid "Invalid format or no future time"
+msgstr ""
+
+#: manager.py:312
+msgid "An unexpected error occurred during validation: {}"
 msgstr ""

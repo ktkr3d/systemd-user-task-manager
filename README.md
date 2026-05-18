@@ -1,10 +1,10 @@
 # Systemd User Task Manager
 
-Systemdのユーザサービス、ユーザタイマーを管理するアプリケーション
+An application to manage systemd user services and user timers.
 
-## インストールと実行
+## Installation and Running
 
-1. 前提パッケージ
+1. Prerequisites
     ```bash
     sudo pacman -S python-gobject libadwaita
     ```
@@ -12,67 +12,67 @@ Systemdのユーザサービス、ユーザタイマーを管理するアプリ�
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     flatpak install flathub org.gnome.Platform//50
     ```
-2. 配布用パッケージ（Flatpak）のダウンロード
+2. Download the distribution package (Flatpak)
    https://github.com/ktkr3d/systemd-user-task-manager/releases
-3. インストール
+3. Installation
     ```bash
     flatpak install --user systemd-user-task-manager.flatpak
     ```
-4. アプリケーションの実行
+4. Running the application
     ```bash
     flatpak run io.github.ktkr3d.systemd-user-task-manager
     ```
-    またはアプリケーションメニューから起動
+    Or launch it from the application menu.
 
-## アンインストール
+## Uninstallation
 
-1. Flatpakパッケージの削除
+1. Remove the Flatpak package
     ```bash
     flatpak uninstall --user io.github.ktkr3d.systemd-user-task-manager
     ```
-2. （任意）作成されたsystemdユニットファイルの削除
+2. (Optional) Delete created systemd unit files
     ```bash
     rm ~/.config/systemd/user/user-task-*
     ```
 
-## 配布用パッケージのビルド
+## Building Distribution Packages
 
-1. 前提パッケージ
+1. Prerequisites
     ```bash
     sudo pacman -S python-gobject libadwaita
     ```
-2. 開発パッケージ
+2. Development packages
     ```bash
     sudo pacman -S python-hatch
     ```
-3. 前提Flatpakパッケージ
+3. Prerequisite Flatpak packages
     ```bash
-    # SDKのインストール（ビルド用）
+    # Install SDK (for building)
     flatpak install flathub org.gnome.Sdk//50
-    # プラットフォームのインストール（実行用）
+    # Install Platform (for running)
     flatpak install flathub org.gnome.Platform//50
     ```
-4. クローン
+4. Clone
     ```bash
     git clone https://github.com/ktkr3d/systemd-user-task-manager.git
     ```
-5. ビルドとFlatpakパッケージの生成
+5. Build and generate Flatpak package
 
     ```bash
-    # 1. まずリポジトリ(repo)としてエクスポートしながらビルド
+    # 1. Build while exporting as a repository (repo)
     flatpak-builder --repo=repo --force-clean build-dir io.github.ktkr3d.systemd-user-task-manager.yaml
 
-    # 2. リポジトリから単一の .flatpak ファイルを生成
+    # 2. Generate a single .flatpak file from the repository
     flatpak build-bundle repo systemd-user-task-manager.flatpak io.github.ktkr3d.systemd-user-task-manager
     ```
 
-## クリーン
+## Clean
 
-1. クリーン
+1. Clean
     ```bash
     flatpak-builder --force-clean build-dir io.github.ktkr3d.systemd-user-task-manager.yaml
     ```
-2. パッケージ削除
+2. Delete package
     ```bash
     rm systemd-user-task-manager.flatpak
     ```

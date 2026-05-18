@@ -5,63 +5,63 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ja\n"
 
-msgid "タスクの設定"
+msgid "Task Settings"
 msgstr "タスクの設定"
 
-msgid "キャンセル"
+msgid "Cancel"
 msgstr "キャンセル"
 
-msgid "保存"
+msgid "Save"
 msgstr "保存"
 
-msgid "タスク名 (ID)"
+msgid "Task ID"
 msgstr "タスク名 (ID)"
 
-msgid "実行コマンド"
+msgid "Command to execute"
 msgstr "実行コマンド"
 
-msgid "ファイルを選択"
+msgid "Select file"
 msgstr "ファイルを選択"
 
-msgid "起動後の遅延 (分)"
+msgid "Delay after boot (min)"
 msgstr "起動後の遅延 (分)"
 
-msgid "停止中の実行漏れを次回起動時に実行 (Persistent)"
+msgid "Execute missed tasks on next boot (Persistent)"
 msgstr "停止中の実行漏れを次回起動時に実行 (Persistent)"
 
-msgid "カスタム"
+msgid "Custom"
 msgstr "カスタム"
 
-msgid "起動時"
+msgid "At Startup"
 msgstr "起動時"
 
-msgid "毎時"
+msgid "Hourly"
 msgstr "毎時"
 
-msgid "毎日"
+msgid "Daily"
 msgstr "毎日"
 
-msgid "毎週"
+msgid "Weekly"
 msgstr "毎週"
 
-msgid "毎月"
+msgid "Monthly"
 msgstr "毎月"
 
-msgid "スケジュール（プリセット）"
+msgid "Schedule (Preset)"
 msgstr "スケジュール（プリセット）"
 
-msgid "スケジュール (OnCalendar)"
+msgid "Schedule (OnCalendar)"
 msgstr "スケジュール (OnCalendar)"
 
 msgid ""
-"systemdの時刻指定形式（OnCalendar）を入力します。\n"
+"Enter systemd time format (OnCalendar).\n"
 "\n"
-"主な例:\n"
-"・hourly, daily, weekly, monthly\n"
-"・12:00 (毎日12:00)\n"
-"・Mon 09:00 (毎週月曜 09:00)\n"
-"・*:00/15 (15分おき)\n"
-"・*-*-01 00:00 (毎月1日)"
+"Examples:\n"
+"- hourly, daily, weekly, monthly\n"
+"- 12:00 (Every day at 12:00)\n"
+"- Mon 09:00 (Every Monday at 09:00)\n"
+"- *:00/15 (Every 15 minutes)\n"
+"- *-*-01 00:00 (1st of every month)"
 msgstr ""
 "systemdの時刻指定形式（OnCalendar）を入力します。\n"
 "\n"
@@ -72,43 +72,55 @@ msgstr ""
 "・*:00/15 (15分おき)\n"
 "・*-*-01 00:00 (毎月1日)"
 
-msgid "コマンドファイルを選択"
+msgid "Select command file"
 msgstr "コマンドファイルを選択"
 
-msgid "システム設定に従う"
+msgid "Follow system settings"
 msgstr "システム設定に従う"
 
-msgid "ライトテーマ"
+msgid "Light theme"
 msgstr "ライトテーマ"
 
-msgid "ダークテーマ"
+msgid "Dark theme"
 msgstr "ダークテーマ"
 
-msgid "テーマ"
+msgid "Theme"
 msgstr "テーマ"
 
 msgid ""
-"次回: {}\n"
-"前回: {} ({})"
+"Next: {}\n"
+"Last: {} ({})"
 msgstr ""
 "次回: {}\n"
 "前回: {} ({})"
 
-msgid "最新の情報に更新"
+msgid "Refresh"
 msgstr "最新の情報に更新"
 
-msgid "ユニットファイルの場所を開く"
+msgid "Open unit files folder"
 msgstr "ユニットファイルの場所を開く"
 
-msgid "Systemd User Task Manager について"
+msgid "About Systemd User Task Manager"
 msgstr "Systemd User Task Manager について"
 
-msgid "タスクを削除しますか？"
+msgid "Delete task?"
 msgstr "タスクを削除しますか？"
 
-msgid "タスク「{}」を削除します。この操作は取り消せません。"
+msgid "Task \"{}\" will be deleted. This action cannot be undone."
 msgstr "タスク「{}」を削除します。この操作は取り消せません。"
 
-msgid "削除"
+msgid "Delete"
 msgstr "削除"
-# その他は省略（msginit で作成すると自動的に埋まります）
+# Others are omitted (automatically filled when created with msginit)
+
+msgid "Please enter a schedule"
+msgstr "スケジュールを入力してください"
+
+msgid "Run {} minutes after system boot"
+msgstr "システム起動の {} 分後に実行"
+
+msgid "Invalid format or no future time"
+msgstr "無効な形式、または将来の時刻がありません"
+
+msgid "An unexpected error occurred during validation: {}"
+msgstr "検証中に予期せぬエラーが発生しました: {}"
