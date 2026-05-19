@@ -166,8 +166,48 @@ class TaskDialog(Adw.Window):
         self.save_btn.set_sensitive(is_valid)
 
     def on_save(self, btn):
-        self.success = True
-        self.close()
+        # スケジュールのバリデーションを実行
+        data = self.get_data()
+        is_valid, msg, status = self.manager.validate_calendar(data['schedule'])
+
+        if is_valid:
+            self.success = True
+            self.close()
+            return
+
+        # エラーの内容に応じてタイトルとメッセージを調整
+        if status == "unavailable":
+            heading = _("Validation Unavailable")
+            body = _("The schedule format could not be verified. Do you want to save it anyway?")
+        else:
+            heading = _("Invalid Schedule")
+            body = _("The schedule format seems invalid. Do you want to save it anyway?")
+
+        # エラーがある場合は確認ダイアログを表示
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading=heading,
+            body=body,
+        )
+
+        # エラー詳細を選択可能なラベルとして追加
+        error_label = Gtk.Label(label=msg, selectable=True, wrap=True, xalign=0)
+        error_label.set_margin_top(12)
+        dialog.set_extra_child(error_label)
+
+        dialog.add_response("cancel", _("Cancel"))
+        dialog.add_response("save", _("Save Anyway"))
+        dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
+        dialog.set_default_response("cancel")
+        dialog.set_close_response("cancel")
+
+        def on_response(d, response_id):
+            if response_id == "save":
+                self.success = True
+                self.close()
+
+        dialog.connect("response", on_response)
+        dialog.present()
 
     def get_data(self):
         schedule = self.schedule_entry.get_text()

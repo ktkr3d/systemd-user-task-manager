@@ -290,40 +290,54 @@ class SystemdManager:
         """Validate schedule using systemd-analyze calendar"""
         schedule = schedule.strip()
         if not schedule:
-            return False, _("Please enter a schedule")
+            return False, _("Please enter a schedule"), "error"
         if schedule.startswith("startup"):
             delay = "0"
             if ":" in schedule:
                 delay = schedule.split(":")[1]
-            return True, _("Run {} minutes after system boot").format(delay) # OnBootSec cannot be validated with ParseCalendar, so we'll just accept it here
+            return True, _("Run {} minutes after system boot").format(delay), "ok" # OnBootSec cannot be validated with ParseCalendar, so we'll just accept it here
 
         try:
-            # Call ParseCalendar via D-Bus
-            # ParseCalendar(calendar_string) -> (uint64_t next_usec, uint64_t accuracy_usec)
-            result = self.bus.call_sync(
-                "org.freedesktop.systemd1",
-                "/org/freedesktop/systemd1",
-                "org.freedesktop.systemd1.Manager",
+            # まずはD-Bus経由で試行
+            result = self.proxy.call_sync(
                 "ParseCalendar",
                 GLib.Variant("(s)", (schedule,)),
-                GLib.VariantType.new("(tt)"),
-                Gio.DBusCallFlags.NONE,
-                -1,
-                None
+                Gio.DBusCallFlags.NONE, -1, None
             )
-            # Return value is a tuple containing the out-arguments: (next_usec, accuracy_usec)
-            next_usec, accuracy_usec = result.unpack()
-            
-            if next_usec > 0 and next_usec < 18446744073709551615:
-                # systemd D-Bus returns microseconds since epoch
-                # datetime.fromtimestamp expects seconds, so convert it
+            next_usec, _ = result.unpack()
+            if 0 < next_usec < 18446744073709551615:
                 dt = datetime.datetime.fromtimestamp(next_usec / 1000000)
-                return True, dt.strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                return False, _("Invalid format or no future time")
-        except GLib.Error as e:
-            # Catch D-Bus errors and return the error message
-            # Extract only the relevant error message part
-            return False, str(e).split(':')[-1].strip()
+                return True, dt.strftime("%Y-%m-%d %H:%M:%S"), "ok"
+        except Exception:
+            pass
+
+        # D-Busが失敗した場合はコマンドラインツールでフォールバック
+        cmd = ["systemd-analyze", "calendar", schedule]
+        
+        # Flatpak環境の場合はホストのコマンド実行を試みる
+        if os.path.exists("/.flatpak-info"):
+            cmd = ["flatpak-spawn", "--host"] + cmd
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True, text=True
+            )
+            if proc.returncode == 0:
+                for line in proc.stdout.splitlines():
+                    if "Next elapse:" in line:
+                        return True, line.replace("Next elapse:", "").strip(), "ok"
+            
+            err_msg = proc.stderr.strip()
+            # Flatpakの権限不足エラーを検知
+            if "org.freedesktop.Flatpak" in err_msg:
+                return False, _("Validation unavailable: Flatpak permission 'talk-name=org.freedesktop.Flatpak' is required to use host tools."), "unavailable"
+            
+            if err_msg:
+                return False, err_msg.split('\n')[-1], "error"
+            return False, _("Invalid schedule format"), "error"
+        except FileNotFoundError:
+            # systemd-analyze が見つからない場合
+            return False, _("Validation unavailable: 'systemd-analyze' command not found."), "unavailable"
         except Exception as e:
-            return False, _("An unexpected error occurred during validation: {}").format(e)
+            return False, str(e), "error"

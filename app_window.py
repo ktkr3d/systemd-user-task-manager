@@ -153,7 +153,7 @@ class AppWindow(Adw.ApplicationWindow):
             transient_for=self,
             application_name="Systemd User Task Manager",
             application_icon="io.github.ktkr3d.systemd-user-task-manager",
-            version="0.1.0",
+            version="0.2.0",
             developer_name="ktkr3d",
             license_type=Gtk.License.GPL_3_0,
             website="https://github.com/ktkr3d/systemd-user-task-manager"
