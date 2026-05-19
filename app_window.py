@@ -5,7 +5,7 @@ from task_dialog import TaskDialog
 class AppWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.set_title("Systemd User Task Manager")
+        self.set_title(_("Systemd User Task Manager"))
         self.set_default_size(600, 500)
         self.manager = SystemdManager()
 
@@ -151,7 +151,7 @@ class AppWindow(Adw.ApplicationWindow):
     def show_about(self, action, param):
         about = Adw.AboutWindow(
             transient_for=self,
-            application_name="Systemd User Task Manager",
+            application_name=_("Systemd User Task Manager"),
             application_icon="io.github.ktkr3d.systemd-user-task-manager",
             version="0.2.0",
             developer_name="ktkr3d",

@@ -1,33 +1,74 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: systemd-user-task-manager 0.1.0\n"
+"Project-Id-Version: systemd-user-task-manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-20 00:00+0900\n"
+"PO-Revision-Date: 2024-05-20 00:00+0900\n"
+"Last-Translator: \n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ja\n"
 
-msgid "Task Settings"
-msgstr "タスクの設定"
+# app_window.py
+msgid "Systemd User Task Manager"
+msgstr "Systemd ユーザータスクマネージャー"
+
+msgid "Follow system settings"
+msgstr "システム設定に従う"
+
+msgid "Light theme"
+msgstr "ライトテーマ"
+
+msgid "Dark theme"
+msgstr "ダークテーマ"
+
+msgid "Theme"
+msgstr "テーマ"
+
+msgid "Refresh"
+msgstr "更新"
+
+msgid "Open unit files folder"
+msgstr "ユニットファイルのフォルダを開く"
+
+msgid "About Systemd User Task Manager"
+msgstr "Systemd ユーザータスクマネージャーについて"
+
+msgid "Next: {}\nLast: {} ({})"
+msgstr "次回: {}\n前回: {} ({})"
+
+msgid "Delete task?"
+msgstr "タスクを削除しますか？"
+
+msgid "Task \"{}\" will be deleted. This action cannot be undone."
+msgstr "タスク「{}」を削除します。この操作は取り消せません。"
 
 msgid "Cancel"
 msgstr "キャンセル"
 
-msgid "Save"
-msgstr "保存"
+msgid "Delete"
+msgstr "削除"
+
+# task_dialog.py
+msgid "Task Settings"
+msgstr "タスク設定"
 
 msgid "Task ID"
-msgstr "タスク名 (ID)"
+msgstr "タスク ID"
 
 msgid "Command to execute"
-msgstr "実行コマンド"
+msgstr "実行するコマンド"
 
 msgid "Select file"
 msgstr "ファイルを選択"
 
 msgid "Delay after boot (min)"
-msgstr "起動後の遅延 (分)"
+msgstr "起動後の遅延（分）"
 
 msgid "Execute missed tasks on next boot (Persistent)"
-msgstr "停止中の実行漏れを次回起動時に実行 (Persistent)"
+msgstr "実行できなかったタスクを次回起動時に実行する (Persistent)"
 
 msgid "Custom"
 msgstr "カスタム"
@@ -51,76 +92,32 @@ msgid "Schedule (Preset)"
 msgstr "スケジュール（プリセット）"
 
 msgid "Schedule (OnCalendar)"
-msgstr "スケジュール (OnCalendar)"
+msgstr "スケジュール（OnCalendar形式）"
 
-msgid ""
-"Enter systemd time format (OnCalendar).\n"
-"\n"
-"Examples:\n"
-"- hourly, daily, weekly, monthly\n"
-"- 12:00 (Every day at 12:00)\n"
-"- Mon 09:00 (Every Monday at 09:00)\n"
-"- *:00/15 (Every 15 minutes)\n"
-"- *-*-01 00:00 (1st of every month)"
-msgstr ""
-"systemdの時刻指定形式（OnCalendar）を入力します。\n"
-"\n"
-"主な例:\n"
-"・hourly, daily, weekly, monthly\n"
-"・12:00 (毎日12:00)\n"
-"・Mon 09:00 (毎週月曜 09:00)\n"
-"・*:00/15 (15分おき)\n"
-"・*-*-01 00:00 (毎月1日)"
+msgid "Save"
+msgstr "保存"
 
-msgid "Select command file"
-msgstr "コマンドファイルを選択"
+msgid "Save Anyway"
+msgstr "そのまま保存"
 
-msgid "Follow system settings"
-msgstr "システム設定に従う"
+msgid "Validation Unavailable"
+msgstr "検証機能を利用できません"
 
-msgid "Light theme"
-msgstr "ライトテーマ"
+msgid "Invalid Schedule"
+msgstr "不正なスケジュール"
 
-msgid "Dark theme"
-msgstr "ダークテーマ"
+msgid "The schedule format seems invalid. Do you want to save it anyway?"
+msgstr "スケジュールの形式が正しくないようです。このまま保存しますか？"
 
-msgid "Theme"
-msgstr "テーマ"
-
-msgid ""
-"Next: {}\n"
-"Last: {} ({})"
-msgstr ""
-"次回: {}\n"
-"前回: {} ({})"
-
-msgid "Refresh"
-msgstr "最新の情報に更新"
-
-msgid "Open unit files folder"
-msgstr "ユニットファイルの場所を開く"
-
-msgid "About Systemd User Task Manager"
-msgstr "Systemd User Task Manager について"
-
-msgid "Delete task?"
-msgstr "タスクを削除しますか？"
-
-msgid "Task \"{}\" will be deleted. This action cannot be undone."
-msgstr "タスク「{}」を削除します。この操作は取り消せません。"
-
-msgid "Delete"
-msgstr "削除"
-# Others are omitted (automatically filled when created with msginit)
-
+# manager.py
 msgid "Please enter a schedule"
 msgstr "スケジュールを入力してください"
 
 msgid "Run {} minutes after system boot"
 msgstr "システム起動の {} 分後に実行"
 
-msgid "Invalid format or no future time"
-msgstr "無効な形式、または将来の時刻がありません"
+msgid "Validation unavailable: 'systemd-analyze' command not found."
+msgstr "検証機能を利用できません: 'systemd-analyze' コマンドが見つかりません。"
 
-msgid "An unexpected error occurred during validation: {}"
-msgstr "検証中に予期せぬエラーが発生しました: {}"
+msgid "Validation unavailable: Flatpak permission 'talk-name=org.freedesktop.Flatpak' is required to use host tools."
+msgstr "検証機能を利用できません: ホスト側のツールを使用するために、Flatpak の権限 'talk-name=org.freedesktop.Flatpak' が必要です。"
