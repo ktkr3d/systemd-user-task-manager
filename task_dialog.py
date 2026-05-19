@@ -57,10 +57,10 @@ class TaskDialog(Adw.Window):
         self.schedule_entry.set_tooltip_text(
             _("Enter systemd time format (OnCalendar).\n\n"
               "Examples:\n"
-              "- hourly, daily, weekly, monthly\n"
+              "- minutely, hourly, daily\n"
               "- 12:00 (Every day at 12:00)\n"
               "- Mon 09:00 (Every Monday at 09:00)\n"
-              "- *:00/15 (Every 15 minutes)\n"
+              "- *:0/15:00 (Every 15 minutes)\n"
               "- *-*-01 00:00 (1st of every month)")
         )
         
@@ -95,9 +95,6 @@ class TaskDialog(Adw.Window):
         group.add(self.schedule_entry)
         group.add(self.delay_row)
         group.add(self.persistent_row)
-
-        self.status_row = Adw.ActionRow(title=_("Validation result"))
-        group.add(self.status_row)
 
         # Connect validation on input change
         self.name_entry.connect("changed", self.on_input_changed)
@@ -165,11 +162,8 @@ class TaskDialog(Adw.Window):
             self.combo_row.set_selected(matched_idx)
             self._updating = False
 
-        # Real-time schedule validation using systemd-analyze logic via DBus
-        is_cal_valid, cal_msg = self.manager.validate_calendar(full_schedule)
-        self.status_row.set_subtitle(cal_msg)
-
-        self.save_btn.set_sensitive(bool(name) and bool(cmd) and is_cal_valid)
+        is_valid = bool(name) and bool(cmd)
+        self.save_btn.set_sensitive(is_valid)
 
     def on_save(self, btn):
         self.success = True

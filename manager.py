@@ -288,6 +288,7 @@ class SystemdManager:
 
     def validate_calendar(self, schedule):
         """Validate schedule using systemd-analyze calendar"""
+        schedule = schedule.strip()
         if not schedule:
             return False, _("Please enter a schedule")
         if schedule.startswith("startup"):
@@ -305,15 +306,15 @@ class SystemdManager:
                 "org.freedesktop.systemd1.Manager",
                 "ParseCalendar",
                 GLib.Variant("(s)", (schedule,)),
-                None,
+                GLib.VariantType.new("(tt)"),
                 Gio.DBusCallFlags.NONE,
                 -1,
                 None
             )
-            # Return value is a (uint64, uint64) tuple
-            next_usec, _ = result.unpack()
+            # Return value is a tuple containing the out-arguments: (next_usec, accuracy_usec)
+            next_usec, accuracy_usec = result.unpack()
             
-            if next_usec > 0:
+            if next_usec > 0 and next_usec < 18446744073709551615:
                 # systemd D-Bus returns microseconds since epoch
                 # datetime.fromtimestamp expects seconds, so convert it
                 dt = datetime.datetime.fromtimestamp(next_usec / 1000000)
@@ -322,7 +323,7 @@ class SystemdManager:
                 return False, _("Invalid format or no future time")
         except GLib.Error as e:
             # Catch D-Bus errors and return the error message
-            # Example: "Invalid calendar specification"
-            return False, e.message
+            # Extract only the relevant error message part
+            return False, str(e).split(':')[-1].strip()
         except Exception as e:
             return False, _("An unexpected error occurred during validation: {}").format(e)
