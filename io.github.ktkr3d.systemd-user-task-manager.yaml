@@ -12,18 +12,13 @@ finish-args:
     - --filesystem=home/.config/systemd/user:create
     - --talk-name=org.freedesktop.Flatpak
 modules:
-    - name: python3-dependencies
-      buildsystem: simple
-      build-commands:
-          - pip3 install --prefix=${FLATPAK_DEST} PyGObject
-
     - name: systemd-user-task-manager
       buildsystem: simple
       build-options:
           build-args:
               - --share=network
       build-commands:
-          - pip3 install --prefix=${FLATPAK_DEST} .
+          - pip3 install --prefix=${FLATPAK_DEST} --no-deps .
           # Desktopファイル、アイコン、Metainfoを明示的にインストール
           - install -Dm644 io.github.ktkr3d.systemd-user-task-manager.desktop ${FLATPAK_DEST}/share/applications/io.github.ktkr3d.systemd-user-task-manager.desktop
           - install -Dm644 io.github.ktkr3d.systemd-user-task-manager.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/io.github.ktkr3d.systemd-user-task-manager.svg

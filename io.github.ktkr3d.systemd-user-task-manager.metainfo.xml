@@ -13,8 +13,14 @@
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/systemd-user-task-manager.png</image>
-      <caption>Main application window showing task list.</caption>
+      <image color_scheme="light">https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/sutm-main-light.png</image>
+      <image color_scheme="dark">https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/sutm-main-dark.png</image>
+      <caption>Main application window showing the task list.</caption>
+    </screenshot>
+    <screenshot>
+      <image color_scheme="light">https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/sutm-add-task-light.png</image>
+      <image color_scheme="dark">https://raw.githubusercontent.com/ktkr3d/systemd-user-task-manager/refs/heads/main/data/screenshots/sutm-add-task-dark.png</image>
+      <caption>Dialog for creating or editing a task.</caption>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/ktkr3d/systemd-user-task-manager</url>
