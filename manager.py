@@ -4,6 +4,8 @@ import re
 import datetime
 from gi.repository import Gio, GLib
 
+__version__ = "0.2.0"
+
 class SystemdManager:
     UNIT_PATH = os.path.expanduser("~/.config/systemd/user/")
     PREFIX = "user-task-"

@@ -1,5 +1,5 @@
 from gi.repository import Gtk, Adw, Gio, GLib
-from manager import SystemdManager
+from manager import SystemdManager, __version__
 from task_dialog import TaskDialog
 
 class AppWindow(Adw.ApplicationWindow):
@@ -153,7 +153,7 @@ class AppWindow(Adw.ApplicationWindow):
             transient_for=self,
             application_name=_("Systemd User Task Manager"),
             application_icon="io.github.ktkr3d.systemd-user-task-manager",
-            version="0.2.0",
+            version=__version__,
             developer_name="ktkr3d",
             license_type=Gtk.License.GPL_3_0,
             website="https://github.com/ktkr3d/systemd-user-task-manager"

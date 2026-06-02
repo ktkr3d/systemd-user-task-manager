@@ -4,11 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "systemd-user-task-manager"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Systemd user task manager with GTK4"
 dependencies = [
     "PyGObject",
 ]
+
+[tool.hatch.version]
+path = "manager.py"
 
 [tool.hatch.build.targets.wheel]
 include = [
